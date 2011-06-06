@@ -38,7 +38,7 @@ def get_index():
 	titles = re.findall(r'alt="(.*?)"', token2)
 	imgs = re.findall(r'src="(.*?)\?', token2)
 
-	for i in xrange(len(urls)-1):
+	for i in xrange(len(urls)):
 		series = classes.Series()
 		series.title = titles[i]
 		series.thumbnail = imgs[i]

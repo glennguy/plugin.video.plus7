@@ -16,7 +16,6 @@ def play(url):
 	p.parse_xbmc_url(url)
 
 	try:
-
 		stream = comm.get_stream(params['id'])
 
 		# Build the final RTMP Url. New syntax for external librtmp

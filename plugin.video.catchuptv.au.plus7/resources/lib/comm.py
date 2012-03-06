@@ -143,9 +143,16 @@ def get_program(path):
 	# Parsing the date is a nightmare
 	date_string = re.findall("<media:pubStart><!\[CDATA\[(.*?)\]\]></media:pubStart>", index)[0]
 	date_parts = date_string.split()
-	date_without_tz = " ".join(date_parts[:-1])
-	timestamp = time.mktime(time.strptime(date_without_tz, '%m/%d/%Y %I:%M:%S %p'))
-	program.date = datetime.date.fromtimestamp(timestamp)
+	
+	try:
+		date_without_tz = " ".join(date_parts[:-1])
+		timestamp = time.mktime(time.strptime(date_without_tz, '%m/%d/%Y %I:%M:%S %p')) # 05/18/2011 04:30:00 AM
+		program.date = datetime.date.fromtimestamp(timestamp)
+	except:
+		date_without_tz = " ".join(date_parts[:-2])
+		timestamp = time.mktime(time.strptime(date_without_tz, '%m/%d/%Y %I:%M:%S')) # 05/18/2011 04:30:00 AM
+		program.date = datetime.date.fromtimestamp(timestamp)
+
 
 	# Get stream
 	#url = "http://cosmos.bcst.yahoo.com/rest/v2/pops;id=%s;lmsoverride=1;element=stream;bw=1200" % program.id
@@ -167,7 +174,10 @@ def get_stream(program_id):
 	url = "http://cosmos.bcst.yahoo.com/rest/v2/pops;id=%s;lmsoverride=1;element=stream;bw=1200" % program_id
 	index = fetch_url(url)
 	
-	rtmp_host = re.findall('url="(.*?)"', index)[0]
-	rtmp_path = re.findall('path="(.*?)"', index)[0]
-
-	return { "rtmp_host": rtmp_host, "rtmp_path": rtmp_path }
+	try:
+		rtmp_host = re.findall('url="(.*?)"', index)[0]
+		rtmp_path = re.findall('path="(.*?)"', index)[0]
+		return { "rtmp_host": rtmp_host, "rtmp_path": rtmp_path }
+	except:
+		# No RTMP given - probably not in AUS
+		pass

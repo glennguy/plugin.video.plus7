@@ -5,6 +5,7 @@
 # main imports
 import sys, os, re, urllib2, urllib
 import comm
+import utils
 
 try:
 	import xbmc, xbmcgui, xbmcplugin
@@ -23,7 +24,10 @@ def make_series_list():
 		ok = fill_series_list(series_list)
 	except:
 		# oops print error message
-		print "ERROR: %s (%d) - %s" % (sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+		d = xbmcgui.Dialog()
+		message = utils.dialog_error("Unable to fetch listing")
+		d.ok(*message)
+		utils.log_error();
 		ok = False
 
 	# send notification we're finished, successfully or unsuccessfully
@@ -52,12 +56,7 @@ def fill_series_list(series_list):
 				raise
 	except:
 		# user cancelled dialog or an error occurred
-		d = xbmcgui.Dialog()
-		d.ok('Plus7 Error', 'Plus7 encountered an error:', '  %s (%d) - %s' % (sys.exc_info()[ 2 ].tb_frame.f_code.co_name, sys.exc_info()[ 2 ].tb_lineno, sys.exc_info()[ 1 ]) )
-		return None
-
-		# user cancelled dialog or an error occurred
-		print "ERROR: %s (%d) - %s" % (sys.exc_info()[ 2 ].tb_frame.f_code.co_name, sys.exc_info()[ 2 ].tb_lineno, sys.exc_info()[ 1 ],)
+		utils.log_error()
 		ok = False
 	return ok
 

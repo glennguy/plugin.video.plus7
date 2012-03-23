@@ -1,15 +1,15 @@
 import os
 
-version     = '0.0.1'
+NAME = 'Plus7'
+VERSION = '0.4-rc1'
 
-# os.uname() is not available on Windows, so we make this optional.
 try:
 	uname = os.uname()
 	os_string = ' (%s %s %s)' % (uname[0], uname[2], uname[4])
 except AttributeError:
 	os_string = ''
 
-user_agent = 'Plus7 plugin for XBMC %s%s' % (version, os_string)
+user_agent = '%s v%s plugin for XBMC %s' % (NAME, VERSION, os_string)
 
 index_url = "http://au.tv.yahoo.com/plus7/browse/"
 

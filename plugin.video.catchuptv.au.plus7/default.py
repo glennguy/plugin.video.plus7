@@ -1,18 +1,19 @@
 import sys
 
-import resources.lib.utils as utils
-import resources.lib.series as series
-import resources.lib.programs as programs
-import resources.lib.play as play
+import os
+import sys
 
-# plugin constants
-__plugin__  = "Plus7"
-__author__  = "Andy Botting"
-__url__     = "http://xbmc-boxee-iview.googlecode.com"
-__svn_url__ = "https://xbmc-boxee-iview.googlecode.com/svn/trunk/xbmc/abc_iview"
-__version__ = "0.0.3"
+# Add our resources/lib to the python path
+try:
+   current_dir = os.path.dirname(os.path.abspath(__file__))
+except:
+   current_dir = os.getcwd()
 
-print "[PLUGIN] '%s: version %s' initialized!" % (__plugin__, __version__)
+sys.path.append( os.path.join( current_dir, "resources", "lib" ) )
+
+import utils, series, programs, play
+
+utils.log('Initialised')
 
 if __name__ == "__main__" :
 	params_str = sys.argv[2]

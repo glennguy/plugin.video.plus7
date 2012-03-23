@@ -1,7 +1,9 @@
 import sys
+import traceback
 import config
 import utils
 import comm
+import utils
 
 try:
 	import xbmc, xbmcgui, xbmcplugin
@@ -17,7 +19,10 @@ def make_programs_list(url):
 		ok = fill_programs_list(program_list)
 	except:
 		# oops print error message
-		print "ERROR: %s (%d) - %s" % (sys.exc_info()[2].tb_frame.f_code.co_name, sys.exc_info()[2].tb_lineno, sys.exc_info()[1])
+		d = xbmcgui.Dialog()
+		message = utils.dialog_error("Unable to fetch listing")
+		d.ok(*message)	
+		utils.log_error();
 		ok = False
 
 	# send notification we're finished, successfully or unsuccessfully
@@ -43,6 +48,11 @@ def fill_programs_list(programs):
 			ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=False, totalItems=len(programs))
 	except:
 		# user cancelled dialog or an error occurred
-		print "ERROR: %s (%d) - %s" % ( sys.exc_info()[ 2 ].tb_frame.f_code.co_name, sys.exc_info()[ 2 ].tb_lineno, sys.exc_info()[ 1 ], )
+		#d = xbmcgui.Dialog()
+		#title = "%s Error" % config.NAME
+		#message = utils.dialog_error("Unable to fetch listing")
+		#d.ok(title, title, message)
+		#d.ok(config.NAME, 'Error:', '  %s (%d) - %s' % (sys.exc_info()[ 2 ].tb_frame.f_code.co_name, sys.exc_info()[ 2 ].tb_lineno, sys.exc_info()[ 1 ]) )
+		utils.log_error()
 		ok = False
 	return ok

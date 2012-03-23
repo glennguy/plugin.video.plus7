@@ -20,7 +20,7 @@ def fetch_url(url):
 	"""	Simple function that fetches a URL using urllib2.
 		An exception is raised if an error (e.g. 404) occurs.
 	"""
-	print "[Plus7] Fetching URL: %s" % url
+	utils.log("Fetching URL: %s" % url)
 	http = urllib2.urlopen(urllib2.Request(url, None))
 	return http.read()
 
@@ -61,27 +61,20 @@ def get_series(series_id):
 
 	# ['John Safran's Race Relations', 'John Safran's Race Relations']
 	titles = re.findall(r'<span class="title">(.*?)</span>', programs_data)
-	print "Titles: %s" % titles
 
 	# ['Episode desc', 'Episode desc']
 	descs = re.findall(r'<p>(.*?)</p>', programs_data)
-	#print "Episode Desc: %s" % descs
 
 	# [' Wed 14 July, series 4 episode 2', ' Wed 14 July, series 4 episode 1']
 	subtitles = re.findall(r'<span class="subtitle">(.*?)</span>', programs_data)
-	#print "Subtitles: %s" % subtitles
 
 	# ['http://l.yimg.com/ea/img/-/100714/0714_city_homicide_ep56v2_sml-163qgka.jpg', 'http://l.yimg.com/ea/img/-/100714/0714_city_homicide_ep55v2_sml-163qgjl.jpg']	
 	thumbs = re.findall(r'src="(.*?)\?', programs_data)
-	#print "Thumbnails: %s" % thumbs
 
 	# ['/plus7/city-homicide/-/watch/7583800/wed-14-july-series-4-episode-2/', '/plus7/city-homicide/-/watch/7583794/wed-14-july-series-4-episode-1/']
 	urls = re.findall(r'<h3><a href="(.*?)">', programs_data)
-	#print "URLs: %s" % urls
 
 	num_episodes = len(urls)
-
-	#print "Number of Episodes: %d" % num_episodes
 
 	for i in xrange(num_episodes):
 		program = classes.Program()
@@ -92,7 +85,6 @@ def get_series(series_id):
 
 		# season 4 episode 2
 		program.episode = subtitles[i].split(',')[-1].lstrip(" ").rstrip(" ")
-		#print "Episode: %s" % program.episode
 
 		#date_string = token6[i].split(',')[0].lstrip(" ").rstrip(" ")
 		#print "date_string: %s " % date_string
@@ -103,8 +95,8 @@ def get_series(series_id):
 		#program.date = datetime.date.fromtimestamp(timestamp)
 
 		program_list.append(program)
-		print program.get_xbmc_list_item()
-		print program.make_xbmc_url()
+		#print program.get_xbmc_list_item()
+		#print program.make_xbmc_url()
 
 	return program_list
 
@@ -117,28 +109,44 @@ def get_program(path):
 	program = classes.Program()
 
 	program.id = re.findall("vid : '(.*?)'", index)[0]
-	print "Program ID: %s" % program.id
 
 	program.title = re.findall("<h1>(.*?)</h1>", index)[0]
-	print "Program Title: %s" % program.title
 
-	program.category = re.findall("Genre: <strong>(.*?)</strong>", index)[0]
-	program.rating = re.findall("Classified: <strong>(.*?)</strong>", index)[0]
+	try:
+		program.category = re.findall("Genre: <strong>(.*?)</strong>", index)[0]
+	except:
+		utils.log_error("Unable to parse program category")
+
+	try:
+		# Classified is now seperated by a newline
+		program.rating = re.findall("Classified:.*?<strong>(.*?)</strong>", index, re.DOTALL)[0]
+	except:
+		utils.log_error("Unable to parse program classification")
 
 	# Get the URL, but split it from the '?', to get the high-res image
-	program.thumbnail = re.findall('<img class="listimg" src="(.*?)" alt', index)[0].split("?")[0]
+	try:
+		program.thumbnail = re.findall('<img class="listimg" src="(.*?)" alt', index)[0].split("?")[0]
+	except:
+		print "Unable to find thumbnail"
 
 	# Get metadata
 	url = "http://cosmos.bcst.yahoo.com/rest/v2/pops;id=%s;lmsoverride=1" % program.id
 	index = fetch_url(url)
 
-	program.episode_title = re.findall("<title><!\[CDATA\[(.*?)\]\]></title>", index)[0].split(": ")[1]
-	print "Episode title: %s" % program.episode_title
+	try:
+		program.episode_title = re.findall("<title><!\[CDATA\[(.*?)\]\]></title>", index)[0].split(": ")[1]
+	except:
+		utils.log_error("Unable to parse episode title")
 
-	program.description = re.findall("<description><!\[CDATA\[(.*?)\]\]></description>", index)[0]
-	print "Episiode description: %s" % program.description
+	try:
+		program.description = re.findall("<description><!\[CDATA\[(.*?)\]\]></description>", index)[0]
+	except: 
+		utils.log_error("Unable to parse episode description")
 
-	program.thumbnail = re.findall('<media:content medium="image" url="(.*?)" name=', index)[0]
+	try:
+		program.thumbnail = re.findall('<media:content medium="image" url="(.*?)" name=', index)[0]
+	except:
+		utils.log_error("Unable to parse program thumbnail")
 
 	# Parsing the date is a nightmare
 	date_string = re.findall("<media:pubStart><!\[CDATA\[(.*?)\]\]></media:pubStart>", index)[0]
@@ -180,4 +188,5 @@ def get_stream(program_id):
 		return { "rtmp_host": rtmp_host, "rtmp_path": rtmp_path }
 	except:
 		# No RTMP given - probably not in AUS
-		pass
+		utils.log_error("Unable to find video URL. Is it usually because you're not in Australia.")
+		

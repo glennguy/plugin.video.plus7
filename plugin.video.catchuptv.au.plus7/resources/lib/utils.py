@@ -1,8 +1,12 @@
+import sys
+import traceback
 import re
 import htmlentitydefs
 import cgi
 import unicodedata
 import urllib
+
+import config
 
 pattern = re.compile("&(\w+?);")
 
@@ -41,3 +45,21 @@ def make_url(d):
 		pairs.append("%s=%s" % (k,v))
 	return "&".join(pairs)
 
+def log(s):
+   print "[%s v%s] %s" % (config.NAME, config.VERSION, s)
+
+def log_error(message=None):
+	exc_type, exc_value, exc_traceback = sys.exc_info()
+	if message:
+		exc_value = message
+	print "[%s v%s] ERROR: %s (%d) - %s" % (config.NAME, config.VERSION, exc_traceback.tb_frame.f_code.co_name, exc_traceback.tb_lineno, exc_value)
+	print traceback.print_exc()
+
+def dialog_error(message):
+	# Generate a list of lines for use in XBMC dialog
+	exc_type, exc_value, exc_traceback = sys.exc_info()
+	string = "%s v%s Error\n%s (%d) - %s\n%s" % (
+		config.NAME, config.VERSION, exc_traceback.tb_frame.f_code.co_name, 
+		exc_traceback.tb_lineno, message, exc_value
+	)
+	return string.split("\n")

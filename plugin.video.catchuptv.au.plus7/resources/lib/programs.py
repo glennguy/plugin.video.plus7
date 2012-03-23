@@ -34,7 +34,8 @@ def fill_programs_list(programs):
 		ok = True
 		for prog in programs:
 
-			p = comm.get_program(prog.url_path)
+			p = prog
+			#p = comm.get_program(prog.url_path)
 			item_info = p.get_xbmc_list_item()
 			item_url = p.make_xbmc_url()
 
@@ -48,11 +49,10 @@ def fill_programs_list(programs):
 			ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=False, totalItems=len(programs))
 	except:
 		# user cancelled dialog or an error occurred
-		#d = xbmcgui.Dialog()
-		#title = "%s Error" % config.NAME
-		#message = utils.dialog_error("Unable to fetch listing")
-		#d.ok(title, title, message)
-		#d.ok(config.NAME, 'Error:', '  %s (%d) - %s' % (sys.exc_info()[ 2 ].tb_frame.f_code.co_name, sys.exc_info()[ 2 ].tb_lineno, sys.exc_info()[ 1 ]) )
+		d = xbmcgui.Dialog()
+		title = "%s Error" % config.NAME
+		message = utils.dialog_error("Unable to fetch listing")
+		d.ok(*msg)
 		utils.log_error()
 		ok = False
 	return ok

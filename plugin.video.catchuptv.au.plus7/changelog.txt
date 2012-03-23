@@ -1,3 +1,8 @@
+[B]Version 0.4[/B]
+- Better exception handling and messages
+- Much faster to list shows
+- Thumbnails for program list
+
 [B]Version 0.0.3[/B]
 - Updates to fix parsing
 - Thumbnail support

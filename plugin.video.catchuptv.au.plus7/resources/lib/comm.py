@@ -49,7 +49,32 @@ def get_index():
 
 def get_series(series_id):
 	""" 
+        <li class="clearfix">
+          <a href="/plus7/felix-the-cat/-/watch/12698938/getting-rid-of-sniffer-series-1-episode-9/?play=1" class="vidimg">
+              <img class="listimg" src="http://l.yimg.com/ea/img/-/120123/kids_felix_s1ep9_lrg_17hqg69-17hqg6o.jpg?x=118&y=66&xc=1&yc=2&wc=629&hc=352&sig=9aw7XqRoa4GRA2aCvHR2GQ--" alt="Felix The Cat" />
+              <span class="vidimg-play">
+                  <span class="txt">Play Video</span>
+                  <span class="matte"></span>
+              </span>
+          </a>
+          <div class="itemdetails">
+            <h3><a href="/plus7/felix-the-cat/-/watch/12698938/getting-rid-of-sniffer-series-1-episode-9/">
+              <span class="title">Felix The Cat</span>
+              <span class="subtitle"> Getting Rid of Sniffer, series 1 episode 9</span>
+            </a></h3>
+            <p>Rock Bottom and the Professor need $10,000 for a vacation, which Felix won't lend them.</p>
+          </div>
+                              <a class="myshows-link" rel="autv-plus7-felix-the-cat"></a>        </li>
+
+
+
+<span class="subtitle"> Thu 22 Mar, series 6 episode 7</span>
+
 	"""
+
+
+
+
 	program_list = []
 	url = config.series_url % series_id
 
@@ -69,7 +94,7 @@ def get_series(series_id):
 	subtitles = re.findall(r'<span class="subtitle">(.*?)</span>', programs_data)
 
 	# ['http://l.yimg.com/ea/img/-/100714/0714_city_homicide_ep56v2_sml-163qgka.jpg', 'http://l.yimg.com/ea/img/-/100714/0714_city_homicide_ep55v2_sml-163qgjl.jpg']	
-	thumbs = re.findall(r'src="(.*?)\?', programs_data)
+	thumbs = re.findall(r'<img class="listimg" src="(.*?)\?', programs_data)
 
 	# ['/plus7/city-homicide/-/watch/7583800/wed-14-july-series-4-episode-2/', '/plus7/city-homicide/-/watch/7583794/wed-14-july-series-4-episode-1/']
 	urls = re.findall(r'<h3><a href="(.*?)">', programs_data)
@@ -84,19 +109,17 @@ def get_series(series_id):
 		program.url_path = urls[i]
 
 		# season 4 episode 2
-		program.episode = subtitles[i].split(',')[-1].lstrip(" ").rstrip(" ")
+		program.episode_title = subtitles[i].split(',')[-1].lstrip(" ").rstrip(" ")
 
-		#date_string = token6[i].split(',')[0].lstrip(" ").rstrip(" ")
-		#print "date_string: %s " % date_string
-		#date = "%s %s" % (date_string, program.get_year())
-		#print "date: %s"
-		#timestamp = time.mktime(time.strptime(date, '%a %d %b %Y'))
-		#print "timestamp: %s" % timestamp
-		#program.date = datetime.date.fromtimestamp(timestamp)
+		date_string = subtitles[i].split(',')[0].lstrip(" ").rstrip(" ")
+		try:
+			date = "%s %s" % (date_string, program.get_year())
+			timestamp = time.mktime(time.strptime(date, '%a %d %b %Y'))
+			program.date = datetime.date.fromtimestamp(timestamp)
+		except:
+			utils.log("Didn't find a valid date from : %s" % date_string)
 
 		program_list.append(program)
-		#print program.get_xbmc_list_item()
-		#print program.make_xbmc_url()
 
 	return program_list
 
@@ -109,7 +132,6 @@ def get_program(path):
 	program = classes.Program()
 
 	program.id = re.findall("vid : '(.*?)'", index)[0]
-
 	program.title = re.findall("<h1>(.*?)</h1>", index)[0]
 
 	try:
@@ -162,6 +184,12 @@ def get_program(path):
 		program.date = datetime.date.fromtimestamp(timestamp)
 
 	return program
+
+
+def get_program_id(path):
+	index = fetch_url("http://au.tv.yahoo.com%s" % path) 
+	return re.findall("vid : '(.*?)'", index)[0]
+
 
 def get_stream(program_id):
 

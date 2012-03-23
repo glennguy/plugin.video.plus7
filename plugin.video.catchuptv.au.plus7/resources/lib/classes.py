@@ -74,7 +74,10 @@ class Program(object):
 		if (self.get_season() and self.get_episode()):
 			title = "%s (%dx%d)" % (self.get_title(), self.get_season(), self.get_episode())
 		else:
-			title = "%s (%s)" % (self.get_title(), self.get_date())
+			if self.get_episode_title():
+				title = "%s (%s)" % (self.get_title(), self.get_episode_title())
+			else:
+				title = "%s (%s)" % (self.get_title(), self.get_date())
 
 		return title
 
@@ -199,6 +202,8 @@ class Program(object):
 			d['date'] = self.date.strftime("%d/%m/%Y %H:%M:%S")
 		if self.thumbnail:
 			d['thumbnail'] = self.thumbnail
+		if self.url_path:
+			d['url_path'] = self.url_path
 		
 		return utils.make_url(d)		
 
@@ -227,3 +232,5 @@ class Program(object):
 			self.date = datetime.date.fromtimestamp(timestamp)
 		if d.has_key('thumbnail'):
 			self.thumbnail = urllib.unquote_plus(d['thumbnail'])
+		if d.has_key('url_path'):
+			self.url_path = d['url_path']

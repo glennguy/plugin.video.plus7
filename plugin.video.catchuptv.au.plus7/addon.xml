@@ -2,7 +2,7 @@
 <addon
   id="plugin.video.catchuptv.au.plus7"
   name="Plus7"
-  version="0.4-rc1"
+  version="0.4-rc2"
   provider-name="Andy Botting">
   <requires>
     <import addon="xbmc.python" version="1.0"/>

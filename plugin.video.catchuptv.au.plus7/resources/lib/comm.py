@@ -10,7 +10,7 @@ from BeautifulSoup import BeautifulStoneSoup
 import simplejson as json
 
 try:
-	import xbmc, xbmcgui, xbmcplugin, xbmcaddon
+	import xbmc, xbmcgui, xbmcplugin
 except ImportError:
 	pass # for PC debugging
 
@@ -160,19 +160,6 @@ def get_program(path):
 		date_without_tz = " ".join(date_parts[:-2])
 		timestamp = time.mktime(time.strptime(date_without_tz, '%m/%d/%Y %I:%M:%S')) # 05/18/2011 04:30:00 AM
 		program.date = datetime.date.fromtimestamp(timestamp)
-
-
-	# Get stream
-	#url = "http://cosmos.bcst.yahoo.com/rest/v2/pops;id=%s;lmsoverride=1;element=stream;bw=1200" % program.id
-	#index = fetch_url(url)
-
-	#program.rtmp_host = re.findall('url="(.*?)"', index)[0]
-	#program.rtmp_path = re.findall('path="(.*?)"', index)[0]
-
-	#duration = re.findall('duration="(.*?)"', index)[0]
-	#print "Duration: %s" % duration
-	#program.duration = int(duration)
-	#print "Parsed duration: %d" % program.duration
 
 	return program
 

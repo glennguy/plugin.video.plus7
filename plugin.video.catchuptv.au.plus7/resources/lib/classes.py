@@ -8,6 +8,7 @@ class Series(object):
 
 	def __init__(self):
 		url = ''
+		thumbnail = None
 
 	def __repr__(self):
 		return self.title
@@ -24,6 +25,11 @@ class Series(object):
 	def get_series_url(self):
 		return self.url.split("/")[-2]
 
+	def get_thumbnail(self):
+		if self.thumbnail:
+			return self.thumbnail
+		else:
+			return 'defaultfolder.png'
 
 class Program(object):
 
@@ -118,7 +124,7 @@ class Program(object):
 			expression from the orginal title, unless its not available,
 			then a 0 will be returned.
 		"""
-		season = re.search('series (?P<season>\d+)', self.episode_title)
+		season = re.search('series\s?(?P<season>\d+)', self.episode_title)
 		if season is None:
 			return self.get_year()
 		return int(season.group('season'))
@@ -128,7 +134,7 @@ class Program(object):
 			expression from the orginal title, unless its not available,
 			then a 0 will be returned.
 		"""
-		episode = re.search('episode (?P<episode>\d+)', self.episode_title)
+		episode = re.search('episode\s?(?P<episode>\d+)', self.episode_title)
 		if episode != None:
 			return int(episode.group('episode'))
 

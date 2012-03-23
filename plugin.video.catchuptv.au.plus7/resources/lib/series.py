@@ -40,8 +40,7 @@ def fill_series_list(series_list):
 		# enumerate through the list of categories and add the item to the media list
 		for s in series_list:
 			url = "%s?series_id=%s" % (sys.argv[0], s.get_series_url())
-			icon = "defaultfolder.png"
-			listitem = xbmcgui.ListItem(s.get_title(), iconImage=icon)
+			listitem = xbmcgui.ListItem(s.get_title(), thumbnailImage=s.get_thumbnail())
 
 			# add the item to the media list
 			ok = xbmcplugin.addDirectoryItem(

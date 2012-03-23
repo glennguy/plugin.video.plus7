@@ -55,11 +55,15 @@ def log_error(message=None):
 	print "[%s v%s] ERROR: %s (%d) - %s" % (config.NAME, config.VERSION, exc_traceback.tb_frame.f_code.co_name, exc_traceback.tb_lineno, exc_value)
 	print traceback.print_exc()
 
-def dialog_error(message):
+def dialog_error(msg):
 	# Generate a list of lines for use in XBMC dialog
 	exc_type, exc_value, exc_traceback = sys.exc_info()
 	string = "%s v%s Error\n%s (%d) - %s\n%s" % (
 		config.NAME, config.VERSION, exc_traceback.tb_frame.f_code.co_name, 
-		exc_traceback.tb_lineno, message, exc_value
+		exc_traceback.tb_lineno, msg, exc_value
 	)
 	return string.split("\n")
+
+def dialog_message(msg):
+	string = "%s v%s\n%s" % (config.NAME, config.VERSION, msg)
+	return string.split("\n")[:4]

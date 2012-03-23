@@ -15,9 +15,16 @@ def play(url):
 	p = classes.Program()
 	p.parse_xbmc_url(url)
 
-	try:
-		stream = comm.get_stream(params['id'])
+	stream = comm.get_stream(params['id'])
 
+	if not stream:
+		d = xbmcgui.Dialog()
+		msg = utils.dialog_message("Error: Stream not availble.\nPlus7 will only work within Australia.")
+		d.ok(*msg)
+		utils.log_error();
+		return
+
+	try:
 		# Build the final RTMP Url. New syntax for external librtmp
 		# http://trac.xbmc.org/ticket/8971
 		rtmp_url = "%s playpath=%s swfurl=%s swfvfy=true" % (stream['rtmp_host'], stream['rtmp_path'], config.swf_url)
@@ -27,8 +34,8 @@ def play(url):
 	
 		xbmc.Player().play(rtmp_url, listitem)
 	except:
-		# user cancelled dialog or an error occurred
+		# oops print error message
 		d = xbmcgui.Dialog()
-		d.ok('Plus7 Error', 'Plus7 encountered an error:', '  %s (%d) - %s' % (sys.exc_info()[ 2 ].tb_frame.f_code.co_name, sys.exc_info()[ 2 ].tb_lineno, sys.exc_info()[ 1 ]) )
-		return None
-		print "ERROR: %s (%d) - %s" % ( sys.exc_info()[ 2 ].tb_frame.f_code.co_name, sys.exc_info()[ 2 ].tb_lineno, sys.exc_info()[ 1 ], )
+		message = utils.dialog_error("Unable to play video")
+		d.ok(*message)
+		utils.log_error();

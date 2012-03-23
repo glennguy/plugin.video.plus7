@@ -64,6 +64,8 @@ def dialog_error(msg):
 	)
 	return string.split("\n")
 
-def dialog_message(msg):
-	string = "%s v%s\n%s" % (config.NAME, config.VERSION, msg)
+def dialog_message(msg, title=None):
+	if not title:
+		title = "%s v%s" % (config.NAME, config.VERSION)
+	string = "%s\n%s" % (title, msg)
 	return string.split("\n")[:4]

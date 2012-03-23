@@ -181,12 +181,19 @@ def get_stream(program_id):
 	# Get stream
 	url = "http://cosmos.bcst.yahoo.com/rest/v2/pops;id=%s;lmsoverride=1;element=stream;bw=1200" % program_id
 	index = fetch_url(url)
+
+	result = {}
 	
 	try:
-		rtmp_host = re.findall('url="(.*?)"', index)[0]
-		rtmp_path = re.findall('path="(.*?)"', index)[0]
-		return { "rtmp_host": rtmp_host, "rtmp_path": rtmp_path }
+		result['rtmp_host'] = re.findall('url="(.*?)"', index)[0]
+		result['rtmp_path'] = re.findall('path="(.*?)"', index)[0]
 	except:
 		# No RTMP given - probably not in AUS
 		utils.log_error("Unable to find video URL. Is it usually because you're not in Australia.")
 		
+	try:
+		result['error'] = re.findall("<media:error.*?<!\[CDATA\[(.*?)\]\]></media:error>", index)[0]
+	except:
+		pass
+
+	return result

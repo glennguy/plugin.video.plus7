@@ -17,11 +17,10 @@ def play(url):
 
 	stream = comm.get_stream(params['id'])
 
-	if not stream:
+	if stream.has_key('error'):
 		d = xbmcgui.Dialog()
-		msg = utils.dialog_message("Error: Stream not availble.\nPlus7 will only work within Australia.")
+		msg = utils.dialog_message("Unable to play video:\n%s" % stream['error'])
 		d.ok(*msg)
-		utils.log_error();
 		return
 
 	try:

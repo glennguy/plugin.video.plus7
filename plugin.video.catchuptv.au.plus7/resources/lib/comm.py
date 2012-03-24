@@ -66,14 +66,7 @@ def get_series(series_id):
           </div>
                               <a class="myshows-link" rel="autv-plus7-felix-the-cat"></a>        </li>
 
-
-
-<span class="subtitle"> Thu 22 Mar, series 6 episode 7</span>
-
 	"""
-
-
-
 
 	program_list = []
 	url = config.series_url % series_id
@@ -108,16 +101,58 @@ def get_series(series_id):
 		program.thumbnail = thumbs[i]
 		program.url_path = urls[i]
 
-		# season 4 episode 2
-		program.episode_title = subtitles[i].split(',')[-1].lstrip(" ").rstrip(" ")
+		# Subtitle can be any one of:
+		#    Sun 18 Mar, series 3 episode 30
+		#    Sun 18 March, series 3 episode 30
+		#    Dragon Invasion, series 1 episode 9
+		#    Now on Sundays
+		#    Conan O'Brian, 2001
 
-		date_string = subtitles[i].split(',')[0].lstrip(" ").rstrip(" ")
-		try:
-			date = "%s %s" % (date_string, program.get_year())
-			timestamp = time.mktime(time.strptime(date, '%a %d %b %Y'))
-			program.date = datetime.date.fromtimestamp(timestamp)
-		except:
-			utils.log("Didn't find a valid date from : %s" % date_string)
+		sub_split = subtitles[i].split(',')
+		for sub in sub_split:
+
+			# Strip the stupid spacing either side
+			sub = sub.lstrip(" ").rstrip(" ")
+
+			# Convert to python compatible short day
+			sub = sub.replace("Tues ", "Tue ")
+			sub = re.sub("March$", "Mar", sub)
+
+			# Not a date - check for episode/series
+			episode = re.search('[Ee]pisode\s?(?P<episode>\d+)', sub)
+			if episode:
+				program.episode = int(episode.group('episode'))
+				#utils.log("Episode found: '%s'" % program.episode)
+
+				# Only check for series if we've previously found episode
+				series = re.search('[Ss]eries\s?(?P<series>\w+)', sub)
+				if series:
+					program.season = int(series.group('series'))
+					#utils.log("Season found: '%s'" % program.season)
+			else:
+				try:
+					# Try parsing the date
+					date = "%s %s" % (sub, program.get_year())
+					timestamp = time.mktime(time.strptime(date, '%a %d %b %Y'))
+					program.date = datetime.date.fromtimestamp(timestamp)
+					#utils.log("Date found: '%s'" % program.date)
+				except:
+					# Occasionally, we have Series X, Episode X with the comma
+					series = re.search('[Ss]eries\s?(?P<series>\w+)', sub)
+					if series:
+						program.season = int(series.group('series'))
+						#utils.log("Season found: '%s'" % program.season)
+					else:
+						# Not a date or contains 'episode' - must be title
+						if sub != '':
+							# Sometimes the actual title has a comma in it. We'll just reconstruct
+							# the parts in that case
+							if program.episode_title:
+								program.episode_title = "%s, %s" % (program.episode_title, sub)
+							else:
+								program.episode_title = sub
+							#utils.log("Episode title found: '%s'" % program.episode_title)
+
 
 		program_list.append(program)
 
@@ -125,6 +160,11 @@ def get_series(series_id):
 
 
 def get_program(path):
+	"""
+		This isn't being used right now. It was previously used to pull
+		more metadata for programs, but meant that we have to make a new
+		http request for every episode listing, which was too slow.
+	"""
 
 	# This stuff needs to go into parser
 	index = fetch_url("http://au.tv.yahoo.com%s" % path) 
@@ -141,7 +181,7 @@ def get_program(path):
 
 	try:
 		# Classified is now seperated by a newline
-		program.rating = re.findall("Classified:.*?<strong>(.*?)</strong>", index, re.DOTALL)[0]
+		program.rating = re.findall("Classified:\s\s+<strong>(.*?)</strong>", index, re.DOTALL)[0]
 	except:
 		utils.log_error("Unable to parse program classification")
 
@@ -172,6 +212,8 @@ def get_program(path):
 
 	# Parsing the date is a nightmare
 	date_string = re.findall("<media:pubStart><!\[CDATA\[(.*?)\]\]></media:pubStart>", index)[0]
+	# Convert to python compatible short day
+	date_string = date_string.replace("Tues", "Tue")
 	date_parts = date_string.split()
 	
 	try:
@@ -187,12 +229,19 @@ def get_program(path):
 
 
 def get_program_id(path):
+	""" 
+		This function only looks for the video ID, and not all of the
+		metadata of the function above
+	"""
 	index = fetch_url("http://au.tv.yahoo.com%s" % path) 
-	return re.findall("vid : '(.*?)'", index)[0]
+	return re.findall("vid\s+?:\s+?'(.*?)'", index)[0]
 
 
 def get_stream(program_id):
-
+	"""
+		This function fetches the RTMP host/path for the actual video
+		stream.
+	"""
 	# Get stream
 	url = "http://cosmos.bcst.yahoo.com/rest/v2/pops;id=%s;lmsoverride=1;element=stream;bw=1200" % program_id
 	index = fetch_url(url)

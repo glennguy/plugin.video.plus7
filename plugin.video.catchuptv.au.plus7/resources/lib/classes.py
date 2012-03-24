@@ -34,11 +34,12 @@ class Series(object):
 class Program(object):
 
 	def __init__(self):
-		self.id = -1
+		self.id = None
 		self.title = ''
 		self.description = ''
-		self.episode_title = ''
-		self.episode = ''
+		self.episode_title = None
+		self.episode = None
+		self.season = None
 		self.category = None
 		self.rating = None
 		self.duration = 0
@@ -65,19 +66,28 @@ class Program(object):
 		""" Return a string of the shorttitle entry, unless its	not 
 			available, then we'll just use the program title instead.
 		"""
-		if self.episode_title and self.episode_title != ' ':
+		if self.episode_title:
 			return utils.descape(self.episode_title)
 
 	def get_list_title(self):
 		""" Return a string of the title, nicely formatted for XBMC list
 		"""
+		title = self.get_title() 
+	
 		if (self.get_season() and self.get_episode()):
-			title = "%s (%dx%d)" % (self.get_title(), self.get_season(), self.get_episode())
+			# Series and episode information
+			title = "%s (S%02dE%02d)" % (title, self.get_season(), self.get_episode())
 		else:
-			if self.get_episode_title():
-				title = "%s (%s)" % (self.get_title(), self.get_episode_title())
+			if self.get_episode():
+				# Only episode information
+				title = "%s (E%02d)" % (title, self.get_episode())
 			else:
-				title = "%s (%s)" % (self.get_title(), self.get_date())
+				if not self.get_episode_title():
+					# Date only, no episode information or episode title
+					title = "%s (%s)" % (title, self.get_date())
+
+		if self.get_episode_title():
+			title = "%s: %s" % (title, self.get_episode_title())
 
 		return title
 
@@ -125,21 +135,18 @@ class Program(object):
 	def get_season(self):
 		""" Return an integer of the Series, discovered by a regular
 			expression from the orginal title, unless its not available,
-			then a 0 will be returned.
+			then the year will be returned.
 		"""
-		season = re.search('series\s?(?P<season>\d+)', self.episode_title)
-		if season is None:
-			return self.get_year()
-		return int(season.group('season'))
+		if self.season:
+			return self.season
 
 	def get_episode(self):
 		""" Return an integer of the Episode, discovered by a regular
 			expression from the orginal title, unless its not available,
 			then a 0 will be returned.
 		"""
-		episode = re.search('episode\s?(?P<episode>\d+)', self.episode_title)
-		if episode != None:
-			return int(episode.group('episode'))
+		if self.episode:
+			return self.episode
 
 	def get_thumbnail(self):
 		""" Returns the thumbnail

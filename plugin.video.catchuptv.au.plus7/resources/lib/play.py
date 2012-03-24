@@ -12,8 +12,6 @@ except ImportError:
 def play(url):
 	params = utils.get_url(url)	
 
-	print params
-	
 	p = classes.Program()
 	p.parse_xbmc_url(url)
 

@@ -1,7 +1,7 @@
 import os
 
 NAME = 'Plus7'
-VERSION = '0.4-rc2'
+VERSION = '0.4-rc3'
 
 try:
 	uname = os.uname()

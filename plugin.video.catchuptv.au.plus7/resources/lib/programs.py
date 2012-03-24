@@ -20,8 +20,8 @@ def make_programs_list(url):
 	except:
 		# oops print error message
 		d = xbmcgui.Dialog()
-		message = utils.dialog_error("Unable to fetch listing")
-		d.ok(*message)	
+		msg = utils.dialog_error("Unable to fetch listing")
+		d.ok(*msg)	
 		utils.log_error();
 		ok = False
 
@@ -39,7 +39,7 @@ def fill_programs_list(programs):
 			item_info = p.get_xbmc_list_item()
 			item_url = p.make_xbmc_url()
 
-			listitem=xbmcgui.ListItem(label=p.get_list_title(), iconImage=p.get_thumbnail(), thumbnailImage=p.get_thumbnail())
+			listitem = xbmcgui.ListItem(label=p.get_list_title(), iconImage=p.get_thumbnail(), thumbnailImage=p.get_thumbnail())
 			listitem.setInfo('video', item_info)
 
 			# Build the URL for the program, including the list_info
@@ -51,7 +51,7 @@ def fill_programs_list(programs):
 		# user cancelled dialog or an error occurred
 		d = xbmcgui.Dialog()
 		title = "%s Error" % config.NAME
-		message = utils.dialog_error("Unable to fetch listing")
+		msg = utils.dialog_error("Unable to fetch listing")
 		d.ok(*msg)
 		utils.log_error()
 		ok = False

@@ -10,7 +10,6 @@ address.
 
 Installation
 ------------
-
 This plugin is available as part of the XBMC CatchUp TV AU repository, but
 you'll always find the latest version here.
 
@@ -35,3 +34,12 @@ For AppleTV:
 ```
 	/Users/frontrow/Library/Application Support/XBMC/addons
 ```
+
+Issues
+------
+For any issues or bug reports, please file them at the GitHub issues part of this project:
+https://github.com/andybotting/xbmc-addon-plus7/issues
+
+Contact Me
+----------
+For anything else, you can contact me by email at andy#andybottng.com

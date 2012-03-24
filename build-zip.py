@@ -4,7 +4,7 @@ import os
 import zipfile
 from xml.dom.minidom import parse
 
-ADDON='plugin.video.catchuptv.au.plus7'
+ADDON='plugin.video.plus7'
 EXCLUDE_EXTS = ['.pyc', '.pyo', '.swp']
 
 # Parse addon.xml for version number

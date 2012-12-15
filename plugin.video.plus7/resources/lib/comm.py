@@ -1,10 +1,11 @@
-import urllib2
+import urllib, urllib2
 import config
 import classes
 import utils
 import re
 import datetime
 import time
+import random
 
 from BeautifulSoup import BeautifulStoneSoup
 import simplejson as json
@@ -17,16 +18,26 @@ except ImportError:
 cache = False
 
 def fetch_url(url):
-	"""	Simple function that fetches a URL using urllib2.
+	"""
+		Simple function that fetches a URL using urllib2.
 		An exception is raised if an error (e.g. 404) occurs.
 	"""
 	utils.log("Fetching URL: %s" % url)
 	http = urllib2.urlopen(urllib2.Request(url, None))
 	return http.read()
 
+def generate_plrs():
+	"""
+		Generate a PLRS string, which Plus7 call a 'guid' although it looks
+		nothing like a GUID. This function is similar to how the javascript
+		from their site works
+	"""
+	return ''.join(random.choice("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._") for x in range(22))
+
 
 def get_index():
-	"""	This function pulls in the index, which contains the TV series
+	"""
+		This function pulls in the index, which contains the TV series
 	"""
 	series_list = []
 	data = fetch_url(config.index_url)
@@ -166,8 +177,7 @@ def get_program(path):
 		http request for every episode listing, which was too slow.
 	"""
 
-	# This stuff needs to go into parser
-	index = fetch_url("http://au.tv.yahoo.com%s" % path) 
+	index = fetch_url(config.program_url + path)
 
 	program = classes.Program()
 
@@ -191,8 +201,9 @@ def get_program(path):
 	except:
 		print "Unable to find thumbnail"
 
-	# Get metadata
-	url = "http://cosmos.bcst.yahoo.com/rest/v2/pops;id=%s;lmsoverride=1" % program.id
+	# Get metadata. URL looks like:
+	#   http://cosmos.bcst.yahoo.com/rest/v2/pops;id=%s;lmsoverride=1
+	url = config.program_metadata_url % program.id
 	index = fetch_url(url)
 
 	try:
@@ -229,34 +240,44 @@ def get_program(path):
 
 
 def get_program_id(path):
-	""" 
-		This function only looks for the video ID, and not all of the
-		metadata of the function above
 	"""
-	index = fetch_url("http://au.tv.yahoo.com%s" % path) 
-	return re.findall("vid\s+?:\s+?'(.*?)'", index)[0]
+		Find the playlist_id of the requested program. This is found in a hash in a
+		block of javascript within the page. It is a normal GUID string.
+	"""
+	index = fetch_url(config.program_url + path)
+	# Find the playlist_id (guid)
+	return re.findall('"id":"([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})"', index)[0]
 
 
-def get_stream(program_id):
+def get_stream(playlist_id):
 	"""
-		This function fetches the RTMP host/path for the actual video
-		stream.
+		This function fetches the RTMP host/path for the actual video stream.
 	"""
-	# Get stream
-	url = "http://cosmos.bcst.yahoo.com/rest/v2/pops;id=%s;lmsoverride=1;element=stream;bw=1200" % program_id
+	plrs = generate_plrs()
+	query = """SELECT * FROM yahoo.media.video.streams WHERE id="%s" AND format="mp4,flv" AND protocol="rtmp" AND plrs="%s" AND offnetwork="false" AND site="autv_plus7" AND lang="en-AU" AND region="AU" AND override="none";""" % (playlist_id, plrs)
+
+	# Fetch our JSON program details from the encoded query. URL looks like:
+	#   http://video.query.yahoo.com/v1/public/yql?q={query}&env=prod&format=json
+	url = "%s/v1/public/yql?q=%s&env=prod&format=json" % (config.stream_url, urllib.quote_plus(query).replace('+','%20'))
 	index = fetch_url(url)
-
+	json_data = json.loads(index)
 	result = {}
-	
+
 	try:
-		result['rtmp_host'] = re.findall('url="(.*?)"', index)[0]
-		result['rtmp_path'] = re.findall('path="(.*?)"', index)[0]
+		# First stream listed is highest quality (last [0])
+		# TODO: Allow selecting any quality
+		stream_data = json_data['query']['results']['mediaObj'][0]['streams'][0]
+
+		result['rtmp_host'] = stream_data['host']
+		# Appending mp4 might break any streams that are in flv. I haven't seen
+		# any examples of this yet. Maybe should comapre to mime-type of json
+		result['rtmp_path'] = "mp4:%s" % stream_data['path']
 	except:
 		# No RTMP given - probably not in AUS
 		utils.log_error("Unable to find video URL. Is it usually because you're not in Australia.")
 		
 	try:
-		result['error'] = re.findall("<media:error.*?<!\[CDATA\[(.*?)\]\]></media:error>", index)[0]
+		result['error'] = json_data['error']['description']
 	except:
 		pass
 

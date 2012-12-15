@@ -30,7 +30,7 @@ def play(url):
 		if stream.has_key('rtmp_host'):
 			# Build the final RTMP Url. New syntax for external librtmp
 			# http://trac.xbmc.org/ticket/8971
-			rtmp_url = "%s playpath=%s swfurl=%s swfvfy=true" % (stream['rtmp_host'], stream['rtmp_path'], config.swf_url)
+			rtmp_url = "%s playpath=%s" % (stream['rtmp_host'], stream['rtmp_path'])
 			listitem=xbmcgui.ListItem(label=p.title, iconImage=p.thumbnail, thumbnailImage=p.thumbnail)
 			listitem.setInfo('video', p.get_xbmc_list_item())
 			xbmc.Player().play(rtmp_url, listitem)

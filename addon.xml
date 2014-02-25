@@ -6,7 +6,7 @@
   <extension library="default.py" point="xbmc.python.pluginsource" provides="video">
     <provides>video</provides>
   </extension>
-  <extension point="xbmc.addon.metadata" library="default.py">
+  <extension library="default.py" point="xbmc.addon.metadata">
     <summary>Plus7 script by Andy Botting</summary>
     <description>PLUS7 offers video streaming of full length episodes as seen on Seven, 7TWO and other content partners - just hit the play button and you can watch high quality, full screen videos straightaway without having to wait for downloads.</description>
     <provides>video</provides>

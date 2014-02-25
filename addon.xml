@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.plus7" name="Plus7" version="1.1" provider-name="Andy Botting">
+<?xml version="1.0" ?><addon id="plugin.video.plus7" name="Plus7" provider-name="Andy Botting" version="2.0">
   <requires>
-    <import addon="xbmc.python" version="1.0"/>
+    <import addon="xbmc.python" version="2.1.0"/>
+    <import addon="script.module.simplejson"/>
   </requires>
-  <extension point="xbmc.python.pluginsource" provides="video" library="default.py">
+  <extension library="default.py" point="xbmc.python.pluginsource" provides="video">
     <provides>video</provides>
   </extension>
   <extension point="xbmc.addon.metadata" library="default.py">

@@ -1,4 +1,9 @@
-[B]Version 2.1[/B]
+[B]Version 2.2[/B]
+- Use setting for deciding streaming method
+- Fix order of platform, to detect Android properly
+
+[B]Version v2.1[/B]
+- Version 2.1
 - Update README
 - Hide series and programs that don't work (mostly Extras)
 - Implement fallback for platforms that don't support HTTPS HLS

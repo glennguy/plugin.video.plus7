@@ -26,6 +26,7 @@ import unicodedata
 import urllib
 import textwrap
 import config
+import xbmc
 
 pattern = re.compile("&(\w+?);")
 
@@ -36,11 +37,13 @@ def descape_entity(m, defs=htmlentitydefs.entitydefs):
     except KeyError:
         return m.group(0) # use as is
 
+
 def descape(string):
     # Fix the hack back from parsing with BeautifulSoup
     string = string.replace('&#38;', '&amp;')
 
     return pattern.sub(descape_entity, string)
+
 
 def get_url(s):
     dict = {}
@@ -52,6 +55,7 @@ def get_url(s):
         v = urllib.unquote_plus(kv[1])
         dict[k] = v
     return dict
+
 
 def make_url(d):
     pairs = []
@@ -66,8 +70,10 @@ def make_url(d):
         pairs.append("%s=%s" % (k,v))
     return "&".join(pairs)
 
+
 def log(s):
     print "[%s v%s] %s" % (config.NAME, config.VERSION, s)
+
 
 def log_error(message=None):
     exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -75,6 +81,7 @@ def log_error(message=None):
         exc_value = message
     print "[%s v%s] ERROR: %s (%d) - %s" % (config.NAME, config.VERSION, exc_traceback.tb_frame.f_code.co_name, exc_traceback.tb_lineno, exc_value)
     print traceback.print_exc()
+
 
 def dialog_error(msg):
     # Generate a list of lines for use in XBMC dialog
@@ -85,6 +92,7 @@ def dialog_error(msg):
     content.append(str(exc_value))
     return content
 
+
 def dialog_message(msg, title=None):
     if not title:
         title = "%s v%s" % (config.NAME, config.VERSION)
@@ -92,3 +100,45 @@ def dialog_message(msg, title=None):
     content = textwrap.wrap(msg, 60)
     content.insert(0, title)
     return content
+
+
+def get_platform():
+    if xbmc.getCondVisibility('system.platform.osx'):
+        return "OSX"
+    elif xbmc.getCondVisibility('system.platform.atv2'):
+        return "ATV2"
+    elif xbmc.getCondVisibility('system.platform.ios'):
+        return "iOS"
+    elif xbmc.getCondVisibility('system.platform.windows'):
+        return "Windows"
+    elif xbmc.getCondVisibility('system.platform.linux'):
+        return "Linux"
+    elif xbmc.getCondVisibility('system.platform.android'):
+        return "Android"
+    return "Unknown"
+
+
+def get_xbmc_version():
+    # 12.3 Git:Unknown
+    version = xbmc.getInfoLabel('system.buildversion')
+    version_number = version.split(' ')[0]
+    return version_number
+
+
+def does_not_support_https_hls():
+    """ HTTPS HLS support is only found in XBMC v13, but not if the platform
+        is iOS or Android. Return True if we are on one of these platforms
+    """
+    version = get_xbmc_version()
+    platform = get_platform()
+
+    log("Found XBMC version/platform: %s/%s" % (platform, version))
+
+    major_ver = version.split('.')[0]
+    if int(major_ver) < 13:
+        return True
+
+    if platform in ['ATV2', 'iOS', 'Android']:
+        return True
+
+    return False

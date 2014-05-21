@@ -17,19 +17,17 @@
 #   along with this plugin. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import sys, os, re, threading
 import urllib, urllib2
-import config
-import classes
-import utils
-import re
-import datetime
-import time
-import random
-import math
-
-import json
+import datetime, time
+import random, math
+import json, m3u8
 import oauth2 as oauth
 
+from hashlib import md5
+
+import xbmc, xbmcgui, xbmcplugin, xbmcaddon
+import config, utils, classes
 
 def fetch_url(url):
     """
@@ -126,7 +124,7 @@ def get_series(series_id):
 
         sub_split = episode.split(',')
         for sub in sub_split:
-            utils.log("Testing for episode title: %s" % sub)
+            #utils.log("Testing for episode title: %s" % sub)
 
             # Strip the stupid spacing either side
             sub = sub.lstrip(" ").rstrip(" ")
@@ -135,13 +133,13 @@ def get_series(series_id):
             sub = sub.replace("Tues ", "Tue ")
             sub = sub.replace("Thurs ", "Thu ")
             sub = re.sub("March$", "Mar", sub)
- 
+
             # Not a date - check for episode/series
             episode = re.search('[Ee]pisode\s?(?P<episode>\d+)', sub)
             if episode:
                 try:
                     p.episode = int(episode.group('episode'))
-                    utils.log("%s - Episode found: '%s'" % (sub, p.episode))
+                    #utils.log("%s - Episode found: '%s'" % (sub, p.episode))
                 except:
                     pass # Not a number. Move on.
 
@@ -150,7 +148,7 @@ def get_series(series_id):
                 if series:
                     try:
                         p.season = int(series.group('series'))
-                        utils.log("%s - Season found: '%s'" % (sub, p.season))
+                        #utils.log("%s - Season found: '%s'" % (sub, p.season))
                     except:
                         pass # Not a number. Move on.
             else:
@@ -159,7 +157,7 @@ def get_series(series_id):
                     date = "%s %s" % (sub, p.get_year())
                     timestamp = time.mktime(time.strptime(date, '%a %d %b %Y'))
                     p.date = datetime.date.fromtimestamp(timestamp)
-                    utils.log("%s - Date found: '%s'" % (sub, p.date))
+                    #utils.log("%s - Date found: '%s'" % (sub, p.date))
                 except:
                     # Not a date or contains 'episode' - must be title
                     if sub != '':
@@ -169,7 +167,7 @@ def get_series(series_id):
                             p.episode_title = "%s, %s" % (p.episode_title, sub)
                         else:
                             p.episode_title = sub
-                        utils.log("%s - Episode title found: '%s'" % (sub, p.episode_title))
+                        #utils.log("%s - Episode title found: '%s'" % (sub, p.episode_title))
 
 
         program_list.append(p)
@@ -182,9 +180,21 @@ def get_program(program_id):
         Fetch the program information and streaming URL for a given
         program ID
     """
-    brightcove_url = "https://api.brightcove.com/services/library?command=find_video_by_reference_id&reference_id=%s&media_delivery=HTTP_IOS&video_fields=id,name,shortDescription,videoStillURL,length,FLVURL&token=BMG-nlpt1dDQcdqz-EIBAUNRGtXnLQv-gbltLyHgproxck0YUZfnkA.." % program_id
-    data = fetch_url(brightcove_url)
-    program_data = json.loads(data)
+    try:
+        brightcove_url = "https://api.brightcove.com/services/library?command=find_video_by_reference_id&reference_id=%s&media_delivery=HTTP_IOS&video_fields=id,name,shortDescription,videoStillURL,length,FLVURL&token=BMG-nlpt1dDQcdqz-EIBAUNRGtXnLQv-gbltLyHgproxck0YUZfnkA.." % program_id
+        data = fetch_url(brightcove_url)
+    except:
+        raise Exception("Error fetching program information, possibly unavailable.")
+
+    if data == 'null':
+        utils.log("Brightcove returned: '%s'" % data)
+        raise Exception("Error fetching program information, possibly unavailable.")
+
+    try:
+        program_data = json.loads(data)
+    except:
+        utils.log("Bad program data: %s" % program_data)
+        raise Exception("Error decoding program information.")
 
     program = classes.Program()
 
@@ -192,11 +202,80 @@ def get_program(program_id):
     program.title = program_data['name']
     program.description = program_data['shortDescription']
     program.thumbnail = program_data['videoStillURL']
-    
-    # Apple iOS HLS stream
-    program.url = program_data['FLVURL']
 
-    # High-quality WMV - doesn't play after about 10 seconds
-    #program.url = program_data['WVMRenditions'][-1]['url']
+    if utils.does_not_support_https_hls():
+        # Use Adam M-W's implementation of handling the HTTPS business within
+        # the m3u8 file directly. He's a legend.
+        utils.log("This platform does not support HTTPS HLS, using fallback...")
+        program.url = get_m3u8(program_data['id'])
+    else:
+        # Use Apple iOS HLS stream directly
+        # This requires gnutls support in ffmpeg, which is only found in XBMC v13
+        # but not available at all in iOS or Android builds
+        utils.log("This platform supports HTTPS HLS, using HLS stream directly...")
+        program.url = program_data['FLVURL']
 
     return program
+
+def get_m3u8(video_id):
+    brightcove_url = 'http://c.brightcove.com/services/mobile/streaming/index/master.m3u8?videoId=%s' % video_id
+    index_m3u8 = m3u8.load(brightcove_url)
+
+    # Get the highest bitrate video
+    rendition_uri = sorted(index_m3u8.playlists, key=lambda playlist: playlist.stream_info.bandwidth)[0].uri
+
+    # Download the rendition and modify the key uris
+    (rendition_m3u8_path, keys) = download_rendition(rendition_uri, video_id)
+
+    # Download the keys
+    download_keys(keys)
+
+    return rendition_m3u8_path
+
+
+def get_temp_dir(video_id):
+    topdir = os.path.join(xbmc.translatePath('special://temp/'), 'addon.video.plus7')
+    if not os.path.isdir(topdir):
+        os.mkdir(topdir)
+
+    dirname = 'brightcove_%s' % video_id
+    path = os.path.join(topdir, dirname)
+    if not os.path.isdir(path):
+        os.mkdir(path)
+    return path
+
+
+def download_rendition(rendition_uri, video_id):
+    temp_dir = get_temp_dir(video_id)
+    utils.log('Downloading rendition file from "%s" to "%s"...' % (rendition_uri, temp_dir))
+    rendition_m3u8_path = os.path.join(temp_dir, 'rendition.m3u8')
+    rendition_m3u8_file = open(rendition_m3u8_path, 'w')
+    rendition_m3u8_response = urllib.urlopen(rendition_uri)
+    keys = []
+    for line in rendition_m3u8_response:
+        match = re.match('#EXT-X-KEY:METHOD=AES-128,URI="(https://.+?)"', line)
+        if match:
+            key_url = match.group(1)
+            key_path = os.path.join(temp_dir, "keyfile_%s.key" % md5(key_url).hexdigest())
+            keys.append((key_path, key_url))
+            rendition_m3u8_file.write('#EXT-X-KEY:METHOD=AES-128,URI="%s"\n' % key_path)
+        else:
+            rendition_m3u8_file.write(line)
+    rendition_m3u8_file.close()
+    return (rendition_m3u8_path, keys)
+
+def download_key(key_path, key_url):
+    urllib.urlretrieve(key_url, key_path)
+
+def download_keys(keys):
+    utils.log('Downloading HLS key files...')
+
+    threads = []
+    for key in keys:
+        thread = threading.Thread(target=download_key, args=key)
+        thread.daemon = True
+        thread.start()
+        threads.append(thread)
+
+    for thread in threads:
+        thread.join()

@@ -29,6 +29,8 @@ from hashlib import md5
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon
 import config, utils, classes
 
+addon = xbmcaddon.Addon(config.ADDON_ID)
+
 def fetch_url(url):
     """
         Simple function that fetches a URL using urllib2.
@@ -203,17 +205,17 @@ def get_program(program_id):
     program.description = program_data['shortDescription']
     program.thumbnail = program_data['videoStillURL']
 
-    if utils.does_not_support_https_hls():
-        # Use Adam M-W's implementation of handling the HTTPS business within
-        # the m3u8 file directly. He's a legend.
-        utils.log("This platform does not support HTTPS HLS, using fallback...")
-        program.url = get_m3u8(program_data['id'])
-    else:
+    if addon and addon.getSetting('video_transport') == 'Native mode (v13 Gotham)':
         # Use Apple iOS HLS stream directly
         # This requires gnutls support in ffmpeg, which is only found in XBMC v13
         # but not available at all in iOS or Android builds
-        utils.log("This platform supports HTTPS HLS, using HLS stream directly...")
+        utils.log("Using native HTTPS HLS stream handling...")
         program.url = program_data['FLVURL']
+    else:
+        # Use Adam M-W's implementation of handling the HTTPS business within
+        # the m3u8 file directly. He's a legend.
+        utils.log("Using stream compatibility mode...")
+        program.url = get_m3u8(program_data['id'])
 
     return program
 
@@ -234,7 +236,7 @@ def get_m3u8(video_id):
 
 
 def get_temp_dir(video_id):
-    topdir = os.path.join(xbmc.translatePath('special://temp/'), 'addon.video.plus7')
+    topdir = os.path.join(xbmc.translatePath('special://temp/'), config.ADDON_ID)
     if not os.path.isdir(topdir):
         os.mkdir(topdir)
 

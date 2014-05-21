@@ -21,6 +21,7 @@ import os
 import version
 
 NAME = 'Plus7'
+ADDON_ID = 'plugin.video.plus7'
 VERSION = version.VERSION
 
 try:

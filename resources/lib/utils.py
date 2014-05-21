@@ -103,18 +103,23 @@ def dialog_message(msg, title=None):
 
 
 def get_platform():
-    if xbmc.getCondVisibility('system.platform.osx'):
-        return "OSX"
+
+    if xbmc.getCondVisibility('system.platform.android'):
+        return "Android"
+    elif xbmc.getCondVisibility('system.platform.linux.raspberrypi'):
+        return "RaspberryPi"
+    elif xbmc.getCondVisibility('system.platform.linux'):
+        return "Linux"
+    elif xbmc.getCondVisibility('system.platform.xbox'):
+        return "XBox"
+    elif xbmc.getCondVisibility('system.platform.windows'):
+        return "Windows"
     elif xbmc.getCondVisibility('system.platform.atv2'):
         return "ATV2"
     elif xbmc.getCondVisibility('system.platform.ios'):
         return "iOS"
-    elif xbmc.getCondVisibility('system.platform.windows'):
-        return "Windows"
-    elif xbmc.getCondVisibility('system.platform.linux'):
-        return "Linux"
-    elif xbmc.getCondVisibility('system.platform.android'):
-        return "Android"
+    elif xbmc.getCondVisibility('system.platform.osx'):
+        return "OSX"
     return "Unknown"
 
 
@@ -132,7 +137,7 @@ def does_not_support_https_hls():
     version = get_xbmc_version()
     platform = get_platform()
 
-    log("Found XBMC version/platform: %s/%s" % (platform, version))
+    log("Found XBMC version/platform: %s/%s" % (version, platform))
 
     major_ver = version.split('.')[0]
     if int(major_ver) < 13:

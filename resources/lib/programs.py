@@ -31,9 +31,17 @@ def make_programs_list(url):
     try:
         params = utils.get_url(url)
         programs = comm.get_series(params["series_id"])
+        num_programs = len(programs)
 
         ok = True
         for p in programs:
+
+            # Don't show any 'promo' shows. They don't get returned by Brightcove
+            if p.duration < 1200:
+                utils.log("Skipping program %s (duration <20 mins)" % p.get_list_title())
+                num_programs -= 1
+                continue
+
             listitem = xbmcgui.ListItem(label=p.get_list_title(), iconImage=p.get_thumbnail(), thumbnailImage=p.get_thumbnail())
             listitem.setInfo('video', p.get_xbmc_list_item())
 
@@ -45,7 +53,7 @@ def make_programs_list(url):
             url = "%s?program_id=%s" % (sys.argv[0], p.id)
 
             # Add the program item to the list
-            ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=False, totalItems=len(programs))
+            ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=False, totalItems=num_programs)
 
         xbmcplugin.endOfDirectory(handle=int(sys.argv[1]), succeeded=ok)
         xbmcplugin.setContent(handle=int(sys.argv[1]), content='episodes')

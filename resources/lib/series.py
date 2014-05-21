@@ -36,6 +36,11 @@ def make_series_list():
 
         ok = True
         for s in series_list:
+            # Don't show any 'promo' shows. They don't get returned by Brightcove
+            if s.get_title().find('Extras') > -1 or s.get_title().find('healthyMEtv') > -1:
+                utils.log("Skipping series %s (hide extras)" % s.get_title())
+                continue
+
             url = "%s?series_id=%s" % (sys.argv[0], s.id)
             thumbnail = s.get_thumbnail()
 

@@ -18,16 +18,12 @@
 #
 
 import sys
-import os
-import urllib2
-import urllib
+import xbmcgui
+import xbmcplugin
+
 import comm
 import utils
 
-try:
-    import xbmc, xbmcgui, xbmcplugin
-except ImportError:
-    pass # for PC debugging
 
 def make_series_list():
     try:
@@ -36,24 +32,16 @@ def make_series_list():
 
         ok = True
         for s in series_list:
-            # Don't show any 'promo' shows. They don't get returned by Brightcove
-            if s.get_title().find('Extras') > -1 or s.get_title().find('healthyMEtv') > -1:
-                utils.log("Skipping series %s (hide extras)" % s.get_title())
-                continue
-
             url = "%s?series_id=%s" % (sys.argv[0], s.id)
             thumbnail = s.get_thumbnail()
 
             listitem = xbmcgui.ListItem(s.get_title(), iconImage=thumbnail, thumbnailImage=thumbnail)
             listitem.setInfo('video', { 'plot' : s.get_description() })
-
+            
             # add the item to the media list
             ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=True)
 
         xbmcplugin.endOfDirectory(handle=int(sys.argv[1]), succeeded=ok)
         xbmcplugin.setContent(handle=int(sys.argv[1]), content='tvshows')
     except:
-        d = xbmcgui.Dialog()
-        message = utils.dialog_error("Unable to fetch listing")
-        d.ok(*message)
-        utils.log_error();
+        utils.handle_error("Unable to fetch series listing")

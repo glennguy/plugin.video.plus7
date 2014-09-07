@@ -1,4 +1,3 @@
-#
 #   Plus7 XBMC Plugin
 #   Copyright (C) 2014 Andy Botting
 #
@@ -17,17 +16,26 @@
 #   along with this plugin. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import sys, os, re, threading
-import urllib, urllib2
-import datetime, time
-import random, math
-import json, m3u8
+import os
+import datetime
+import json
+import re
+import threading
+import time
+import urllib
+import urllib2
+
+import xbmc
+import xbmcaddon
+
+import m3u8
 import oauth2 as oauth
 
 from hashlib import md5
 
-import xbmc, xbmcgui, xbmcplugin, xbmcaddon
-import config, utils, classes
+import config
+import utils
+import classes
 
 addon = xbmcaddon.Addon(config.ADDON_ID)
 
@@ -69,6 +77,15 @@ def get_index():
     series_data = json_data['query']['results']['json']['show_data']
 
     for series in series_data:
+
+        title = series_data[series]['title']
+
+        # Don't show any 'promo' shows. They don't get returned by Brightcove
+        if (title.find('Extras') > -1 or 
+                title.find('healthyMEtv') > -1):
+            utils.log("Skipping series %s (hide extras)" % title)
+            continue
+
         s = classes.Series()
         s.id = series
         s.title = series_data[series]['title']

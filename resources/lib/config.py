@@ -24,16 +24,11 @@ NAME = 'Plus7'
 ADDON_ID = 'plugin.video.plus7'
 VERSION = version.VERSION
 
-try:
-    uname = os.uname()
-    os_string = ' (%s %s %s)' % (uname[0], uname[2], uname[4])
-except AttributeError:
-    os_string = ''
-
-user_agent = '%s v%s for XBMC %s' % (NAME, VERSION, os_string)
+GITHUB_API_URL = 'https://api.github.com/repos/andybotting/xbmc-addon-plus7'
+ISSUE_API_URL = GITHUB_API_URL + '/issues'
+ISSUE_API_AUTH = 'eGJtY2JvdDo1OTQxNTJjMTBhZGFiNGRlN2M0YWZkZDYwZGQ5NDFkNWY4YmIzOGFj'
+GIST_API_URL = 'https://api.github.com/gists'
 
 api_url = 'https://y7mobile.query.yahoo.com/v1/yql'
-
-# Took a LOT of effort to get this
 oauth_consumer_key = 'dj0yJmk9QWJodDF5WDVnTGhwJmQ9WVdrOU1HODNiVXB0TnpnbWNHbzlNVGc0TWpnMk5UUTJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD04Yw--'
 oauth_consumer_secret = '0e4a80fc03b8ff1ed74a68a8dc583e77ff9e279b'

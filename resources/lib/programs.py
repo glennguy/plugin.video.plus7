@@ -18,14 +18,12 @@
 #
 
 import sys
-import config
 import utils
 import comm
 
-try:
-    import xbmc, xbmcgui, xbmcplugin
-except ImportError:
-    pass # for PC debugging
+import xbmcgui
+import xbmcplugin
+
 
 def make_programs_list(url):
     try:
@@ -58,7 +56,4 @@ def make_programs_list(url):
         xbmcplugin.endOfDirectory(handle=int(sys.argv[1]), succeeded=ok)
         xbmcplugin.setContent(handle=int(sys.argv[1]), content='episodes')
     except:
-        d = xbmcgui.Dialog()
-        msg = utils.dialog_error("Unable to fetch listing")
-        d.ok(*msg)
-        utils.log_error();
+        utils.handle_error("Unable to fetch program listing")

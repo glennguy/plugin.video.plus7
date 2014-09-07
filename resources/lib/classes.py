@@ -17,11 +17,13 @@
 #   along with this plugin. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import re
-import utils
 import datetime
-import urllib
+import re
 import time
+import urllib
+
+import utils
+
 
 class Series(object):
 

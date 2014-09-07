@@ -18,15 +18,14 @@
 #
 
 import sys
+
+import xbmc
+import xbmcgui
+
 import config
 import utils
 import classes
 import comm
-
-try:
-    import xbmc, xbmcgui, xbmcplugin
-except ImportError:
-    pass # for PC debugging
 
 def play(url):
     try:
@@ -40,10 +39,7 @@ def play(url):
             listitem.addStreamInfo('audio', p.get_xbmc_audio_stream_info())
             listitem.addStreamInfo('video', p.get_xbmc_video_stream_info())
     
+        utils.log("Attempting to play: %s" % p.get_title())
         xbmc.Player().play(p.get_url(), listitem)
     except:
-        # oops print error message
-        d = xbmcgui.Dialog()
-        message = utils.dialog_error("Unable to play video")
-        d.ok(*message)
-        utils.log_error();
+        utils.handle_error("Unable to play video")

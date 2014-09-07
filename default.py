@@ -26,11 +26,16 @@ try:
 except:
    current_dir = os.getcwd()
 
-sys.path.append( os.path.join( current_dir, "resources", "lib" ) )
+pypath = os.path.join(current_dir, 'resources', 'lib')
+sys.path.append(pypath)
 
-import utils, series, programs, play
+import utils
+import series
+import programs
+import play
 
-utils.log('Initialised')
+# Print our platform/version debugging information
+utils.log_xbmc_platform_version()
 
 if __name__ == "__main__" :
     params_str = sys.argv[2]

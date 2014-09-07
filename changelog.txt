@@ -1,4 +1,8 @@
-[B]Version 2.2[/B]
+[B]Version 2.3[/B]
+- Add issue reporting and clean up imports
+
+[B]Version v2.2[/B]
+- Version 2.2
 - Use setting for deciding streaming method
 - Fix order of platform, to detect Android properly
 

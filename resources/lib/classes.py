@@ -87,6 +87,7 @@ class Program(object):
         self.date = None
         self.thumbnail = ''
         self.url = None
+        self.subtitle = None #added a new property to store subtitle url
 
     def __repr__(self):
         return self.title
@@ -231,9 +232,7 @@ class Program(object):
         return d
 
     def get_xbmc_audio_stream_info(self):
-        """
-            Return an audio stream info dict
-        """
+        #Return an audio stream info dict
         d = {}
         # This information may be incorrect
         d['codec']    = 'aac'
@@ -242,9 +241,7 @@ class Program(object):
         return d
 
     def get_xbmc_video_stream_info(self):
-        """
-            Return a video stream info dict
-        """
+        #Return a video stream info dict
         d = {}
         d['codec']  = 'h264'
         if self.get_duration(): 

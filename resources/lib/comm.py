@@ -200,7 +200,8 @@ def get_program(program_id):
         program ID
     """
     try:
-        brightcove_url = "https://api.brightcove.com/services/library?command=find_video_by_reference_id&reference_id=%s&media_delivery=HTTP_IOS&video_fields=id,name,shortDescription,videoStillURL,length,FLVURL&token=BMG-nlpt1dDQcdqz-EIBAUNRGtXnLQv-gbltLyHgproxck0YUZfnkA.." % program_id
+	#added the captioning to the url to get subtitles if available
+        brightcove_url = "https://api.brightcove.com/services/library?command=find_video_by_reference_id&reference_id=%s&media_delivery=HTTP_IOS&video_fields=id,name,shortDescription,videoStillURL,length,FLVURL,captioning&token=BMG-nlpt1dDQcdqz-EIBAUNRGtXnLQv-gbltLyHgproxck0YUZfnkA.." % program_id
         data = fetch_url(brightcove_url)
     except:
         raise Exception("Error fetching program information, possibly unavailable.")
@@ -221,6 +222,7 @@ def get_program(program_id):
     program.title = program_data['name']
     program.description = program_data['shortDescription']
     program.thumbnail = program_data['videoStillURL']
+    program.subtitles = program_data['captioning']['captionSources'][0]['url'] #if url exists, load to the program class
 
     if addon and addon.getSetting('video_transport') == 'Native mode (v13 Gotham)':
         # Use Apple iOS HLS stream directly

@@ -1,8 +1,8 @@
-Plus7 plugin for XBMC
+Plus7 plugin for Kodi/XBMC
 ================================
 
 This plugin provides a simple list of available programs from the Plus7
-web site, and allows you to stream them with XBMC.
+web site, and allows you to stream them with Kodi/XBMC.
 
 The content is only available with Australia, or you can apparently use sites
 like Unblock-US, UnoTelly or Tunlr.net (free). or your own VPN solution which
@@ -11,11 +11,11 @@ terminates in with an AU IP address.
 This addon relies on the mobile stream for iOS and Android. This used the HLS
 stream, which requires HTTPS support. We support native support for new
 platforms (XBMC v13 Gotham, excluding Android and iOS), but provide a fallback for
-other platforms (e.g. XBMC v12 Frodo and Android/iOS).
+other platforms (e.g. XBMC v12 Frodo and Android/iOS builds).
 
 Thanks for contributions from:
   * Adam M-W
-
+  * nunoidev
 
 Installation
 ------------
@@ -24,13 +24,14 @@ The latest stable release of this add-on is available as part of the
 
 For the latest development version, you can grab the [GitHub generated ZIP file] [githubzip].
 
-Simply download the ZIP file to your XBMC device and install through the menu via
+Simply download the ZIP file to your Kodi/XBMC device and install through the menu via
+
 System -> Settings -> Add-ons -> Install from zip file
 
 Issues
 ------
-If you find an issue, please test with the latest version of XBMC. I would
-recommend XBMC v13.1 Gotham or later.
+If you find an issue, please test with the latest version of Kodi. I would
+recommend Kodi v14 or later.
 
 If you're using a Raspberry Pi or another dedicated HTPC, I would recommend
 using [OpenELEC] [openelec].
@@ -39,26 +40,21 @@ For any other issues or bug reports, please file them on the [issues page] [issu
 
 Please include log output if possible, using Github Gist or Pastebin.com.
 
-The location of your XBMC log file will depend on your platform.
+The location of your log file will depend on your platform.
 
 For Windows:
 ```
-%APPDATA%\XBMC\temp\xbmc.log
+%APPDATA%\kodi\temp\xbmc.log
 ```
 
 For Linux:
 ```
-~/.xbmc/temp/xbmc.log
+~/.kodi/temp/kodi.log
 ```
 
 For Mac OS X:
 ```
-~/Library/Application Support/XBMC/temp/xbmc.log
-```
-
-For AppleTV:
-```
-/Users/frontrow/Library/Application Support/XBMC/temp/xbmc.log
+~/Library/Application Support/Kodi/temp/kodi.log
 ```
 
 Contact Me

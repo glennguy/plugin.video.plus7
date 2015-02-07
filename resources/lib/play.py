@@ -18,18 +18,22 @@
 #
 
 import sys
-import os	#need to write temp subtitle
-import re	#need regular expression to read subtitle file
-import urllib2	#need to fetch the subtitle
+import os
+import re
+import urllib2
 
 import xbmc
 import xbmcgui
-import xbmcaddon	#need to get addon info/profile
+import xbmcaddon
 
 import config
 import utils
 import classes
 import comm
+
+from pycaption import DFXPReader, SRTWriter
+
+addon = xbmcaddon.Addon()
 
 def play(url):
     try:
@@ -43,32 +47,28 @@ def play(url):
             listitem.addStreamInfo('audio', p.get_xbmc_audio_stream_info())
             listitem.addStreamInfo('video', p.get_xbmc_video_stream_info())
 
-        #get addon profile/path to create a temporary .srt file
-	addon = xbmcaddon.Addon()
-        profile = addon.getAddonInfo('profile')
-        subfile = xbmc.translatePath(os.path.join(profile, 'temp.srt'))
-        prodir  = xbmc.translatePath(os.path.join(profile))
-        if not os.path.isdir(prodir):
-            os.makedirs(prodir)
+        # Pull subtitles if available
+        if addon.getSetting('subtitles_enabled') == "true":
+            if p.subtitle:
+                utils.log("Enabling subtitles: %s" % p.subtitle)
+                profile = addon.getAddonInfo('profile')
+                subfilename = xbmc.translatePath(os.path.join(profile, 'subtitle.srt'))
+                profiledir = xbmc.translatePath(os.path.join(profile))
+                if not os.path.isdir(profiledir):
+                    os.makedirs(profiledir)
 
-        #fetch the subtitle and convert to srt
-	pg = urllib2.urlopen(p.subtitles).read()
-        if pg != "":
-            ofile = open(subfile, 'w+')
-            captions = re.compile('<p begin="(.+?)" end="(.+?)">(.+?)</p>').findall(pg)
-            idx = 1
-            for cstart, cend, caption in captions:
-                cstart = cstart.replace('.',',')
-                cend   = cend.replace('.',',').split('"',1)[0]
-                caption = caption.replace('<br/>','\n').replace('&gt;','>')
-                ofile.write( '%s\n%s --> %s\n%s\n\n' % (idx, cstart, cend, caption))
-                idx += 1
-            ofile.close()
-    
-    	#tell the player to read the subtitle
-	listitem.setSubtitles(['special://temp/temp.srt', subfile])
-        
-	utils.log("Attempting to play: %s" % p.get_title())
+                dfxp_data = urllib2.urlopen(p.subtitle).read().decode('utf-8')
+                if dfxp_data:
+                    f = open(subfilename, 'w')
+                    dfxp_subtitle = DFXPReader().read(dfxp_data)
+                    srt_subtitle = SRTWriter().write(dfxp_subtitle)
+                    srt_unicode = srt_subtitle.encode('utf-8')
+                    f.write(srt_unicode)
+                    f.close()
+
+                listitem.setSubtitles([subfilename])
+            
+        utils.log("Attempting to play: %s" % p.get_title())
         xbmc.Player().play(p.get_url(), listitem)
     except:
         utils.handle_error("Unable to play video")

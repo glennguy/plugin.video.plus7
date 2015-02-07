@@ -7,6 +7,9 @@
 
     <!-- Stream Handling -->
     <string id="10090">Stream Handling</string>
-    <string id="10091">Compatability mode (v12 or Android/iOS)</string>
-    <string id="10092">Native mode (v13 Gotham)</string>
+    <string id="10091">Compatability mode (XBMC v12 or Android/iOS)</string>
+    <string id="10092">Native mode (XBMC v13, Kodi v14+)</string>
+
+    <!-- Subtitles -->
+    <string id="10093">Enable Subtitles</string>
 </strings>

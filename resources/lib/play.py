@@ -33,6 +33,7 @@ import comm
 
 from pycaption import DFXPReader, SRTWriter
 
+
 addon = xbmcaddon.Addon()
 
 def play(url):
@@ -46,6 +47,8 @@ def play(url):
         if hasattr(listitem, 'addStreamInfo'):
             listitem.addStreamInfo('audio', p.get_xbmc_audio_stream_info())
             listitem.addStreamInfo('video', p.get_xbmc_video_stream_info())
+
+        player = xbmc.Player()
 
         # Pull subtitles if available
         if addon.getSetting('subtitles_enabled') == "true":
@@ -66,9 +69,21 @@ def play(url):
                     f.write(srt_unicode)
                     f.close()
 
-                listitem.setSubtitles([subfilename])
-            
+                if hasattr(listitem, 'setSubtitles'):
+                    # This function only supported from Kodi v14+
+                    listitem.setSubtitles([subfilename])
+
+        # Play video
         utils.log("Attempting to play: %s" % p.get_title())
-        xbmc.Player().play(p.get_url(), listitem)
+        player.play(p.get_url(), listitem)
+
+        # Enable subtitles for XBMC v13
+        if addon.getSetting('subtitles_enabled') == "true":
+            if p.subtitle:
+                if not hasattr(listitem, 'setSubtitles'):
+                    while not player.isPlaying():
+                        xbmc.sleep(100) # wait until video is being played
+                        player.setSubtitles(subfilename)
+
     except:
         utils.handle_error("Unable to play video")

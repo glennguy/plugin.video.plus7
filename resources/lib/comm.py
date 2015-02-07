@@ -228,7 +228,7 @@ def get_program(program_id):
             utils.log("Subtitles are available for this program")
             program.subtitle = program_data['captioning']['captionSources'][0]['url']
 
-    if addon and addon.getSetting('video_transport') == 'Native mode (v13 Gotham)':
+    if addon and addon.getSetting('video_transport') == 'Native mode (XBMC v13, Kodi v14+)':
         # Use Apple iOS HLS stream directly
         # This requires gnutls support in ffmpeg, which is only found in XBMC v13
         # but not available at all in iOS or Android builds

@@ -1,4 +1,13 @@
-[B]Version 2.3[/B]
+[B]Version 2.4[/B]
+- Don't exclude programs 19 mins long
+- fix missing duration... sort of
+- Fix subtitles for XBMC v13
+- Properly rework subtitle support. Enable in settings
+- Added subtitles support to XBMC/Kodi
+- Add new icon
+
+[B]Version v2.3[/B]
+- Version 2.3
 - Add issue reporting and clean up imports
 
 [B]Version v2.2[/B]

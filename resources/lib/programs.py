@@ -35,8 +35,8 @@ def make_programs_list(url):
         for p in programs:
 
             # Don't show any 'promo' shows. They don't get returned by Brightcove
-            if p.duration < 1200:
-                utils.log("Skipping program %s (duration <20 mins)" % p.get_list_title())
+            if p.duration and p.duration < 1000:
+                utils.log("Skipping program %s (duration <19 mins)" % p.get_list_title())
                 num_programs -= 1
                 continue
 

@@ -116,7 +116,9 @@ def get_series(series_id):
         p.title = program['show']
         p.description = program['abstract']
         p.thumbnail = program['image']
-        p.duration = int(float(program['duration']))
+
+        if 'duration' in program.keys():
+            p.duration = int(float(program['duration']))
 
         # Sometimes they leave out the episode information
         if program.has_key('episode') and program['episode'] is not None:

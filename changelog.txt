@@ -1,4 +1,9 @@
-[B]Version 2.5[/B]
+[B]Version 2.6[/B]
+- Better handling of missing data and fix for XBMC v12 program list
+
+[B]Version v2.5[/B]
+- Version 2.5
+- Merge pull request #511 from micahg/master
 - another half ass fix
 
 [B]Version v2.4[/B]

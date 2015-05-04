@@ -90,7 +90,8 @@ def get_index():
         s.id = series
         s.title = series_data[series]['title']
         s.description = series_data[series]['info']
-        s.thumbnail = series_data[series]['thumbnail']
+        if 'thumbnail' in series_data[series]:
+            s.thumbnail = series_data[series]['thumbnail']
         series_list.append(s)
 
     return series_list

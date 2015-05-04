@@ -1,8 +1,14 @@
-[B]Version 2.4[/B]
+[B]Version 2.5[/B]
+- another half ass fix
+
+[B]Version v2.4[/B]
+- Version 2.4
 - Don't exclude programs 19 mins long
+- Merge pull request #489 from micahg/master
 - fix missing duration... sort of
 - Fix subtitles for XBMC v13
 - Properly rework subtitle support. Enable in settings
+- Merge pull request #306 from nunoidev/master
 - Added subtitles support to XBMC/Kodi
 - Add new icon
 

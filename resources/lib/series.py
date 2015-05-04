@@ -35,9 +35,13 @@ def make_series_list():
             url = "%s?series_id=%s" % (sys.argv[0], s.id)
             thumbnail = s.get_thumbnail()
 
-            listitem = xbmcgui.ListItem(s.get_title(), iconImage=thumbnail, thumbnailImage=thumbnail)
+            # Thumbnail that doesn't exist breaks XBMC 12
+            listitem = xbmcgui.ListItem(s.get_title())
+            if thumbnail:
+                listitem = xbmcgui.ListItem(s.get_title(), iconImage=thumbnail, thumbnailImage=thumbnail)
+
             listitem.setInfo('video', { 'plot' : s.get_description() })
-            
+
             # add the item to the media list
             ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=True)
 

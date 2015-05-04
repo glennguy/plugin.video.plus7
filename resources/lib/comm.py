@@ -81,17 +81,16 @@ def get_index():
         title = series_data[series]['title']
 
         # Don't show any 'promo' shows. They don't get returned by Brightcove
-        if (title.find('Extras') > -1 or 
-                title.find('healthyMEtv') > -1):
+        blacklist = ['Extras', 'healthyMEtv', 'PREVIEW', 'TV Buzz']
+        if any(x in title for x in blacklist):
             utils.log("Skipping series %s (hide extras)" % title)
             continue
 
         s = classes.Series()
         s.id = series
-        s.title = series_data[series]['title']
-        s.description = series_data[series]['info']
-        if 'thumbnail' in series_data[series]:
-            s.thumbnail = series_data[series]['thumbnail']
+        s.title = series_data[series].get('title')
+        s.description = series_data[series].get('info')
+        s.thumbnail = series_data[series].get('thumbnail')
         series_list.append(s)
 
     return series_list
@@ -113,19 +112,17 @@ def get_series(series_id):
 
     for program in program_data:
         p = classes.Program()
-        p.id = program['id']
-        p.title = program['show']
-        p.description = program['abstract']
-        p.thumbnail = program['image']
+        p.id = program.get('id')
+        p.title = program.get('show')
+        p.description = program.get('abstract')
+        p.thumbnail = program.get('image')
 
         if 'duration' in program.keys():
             p.duration = int(float(program['duration']))
 
-        # Sometimes they leave out the episode information
-        if program.has_key('episode') and program['episode'] is not None:
-            episode = program['episode']
-        else:
-            episode = program['show']
+        # Sometimes they leave out the episode information, so use show
+        show = program.get('show')
+        episode = program.get('episode', show)
 
         # Subtitle can be any one of:
         #    Sun 18 Mar, series 3 episode 30
@@ -220,10 +217,10 @@ def get_program(program_id):
 
     program = classes.Program()
 
-    program.id = program_data['id']
-    program.title = program_data['name']
-    program.description = program_data['shortDescription']
-    program.thumbnail = program_data['videoStillURL']
+    program.id = program_data.get('id')
+    program.title = program_data.get('name')
+    program.description = program_data.get('shortDescription')
+    program.thumbnail = program_data.get('videoStillURL')
     if program_data.has_key('captioning'):
         if program_data['captioning'] == None:
             utils.log("No subtitles available for this program")
@@ -236,12 +233,12 @@ def get_program(program_id):
         # This requires gnutls support in ffmpeg, which is only found in XBMC v13
         # but not available at all in iOS or Android builds
         utils.log("Using native HTTPS HLS stream handling...")
-        program.url = program_data['FLVURL']
+        program.url = program_data.get('FLVURL')
     else:
         # Use Adam M-W's implementation of handling the HTTPS business within
         # the m3u8 file directly. He's a legend.
         utils.log("Using stream compatibility mode...")
-        program.url = get_m3u8(program_data['id'])
+        program.url = get_m3u8(program.id)
 
     return program
 

@@ -26,6 +26,7 @@ import utils
 
 
 def make_series_list():
+    utils.log('Showing series list')
     try:
         series_list = comm.get_index()
         series_list.sort()

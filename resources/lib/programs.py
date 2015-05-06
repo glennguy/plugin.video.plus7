@@ -31,6 +31,8 @@ def make_programs_list(url):
         programs = comm.get_series(params["series_id"])
         num_programs = len(programs)
 
+        utils.log('Showing programs list for %s' % params['series_id'])
+
         ok = True
         for p in programs:
 

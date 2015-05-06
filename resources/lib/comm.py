@@ -111,83 +111,86 @@ def get_series(series_id):
         program_data = [program_data]
 
     for program in program_data:
-        p = classes.Program()
-        p.id = program.get('id')
-        p.title = program.get('show')
-        p.description = program.get('abstract')
-        p.thumbnail = program.get('image')
+        try:
+            p = classes.Program()
+            p.id = program.get('id')
+            p.title = program.get('show')
+            p.description = program.get('abstract')
+            p.thumbnail = program.get('image')
 
-        if 'duration' in program.keys():
-            p.duration = int(float(program['duration']))
+            if 'duration' in program.keys():
+                p.duration = int(float(program['duration']))
 
-        # Sometimes they leave out the episode information, so use show
-        show = program.get('show')
-        episode = program.get('episode', show)
+            # Sometimes they leave out the episode information, so use show
+            show = program.get('show')
+            episode = program.get('episode', show)
 
-        # Subtitle can be any one of:
-        #    Sun 18 Mar, series 3 episode 30
-        #    Sun 18 March, series 3 episode 30
-        #    Dragon Invasion, series 1 episode 9
-        #    Beyond The Blacklist - Episode 12
-        #    Now on Sundays
-        #    Conan O'Brian, 2001
-
-        # Replace any MS Word 'dash' instances
-        episode = episode.replace(u'\u2013', u'-')
-
-        # Sometimes they embed unicode
-        episode = episode.encode('ascii', 'ignore')
-
-        # Sometimes they separate with a dash
-        episode = episode.replace(' - ', ' , ')
-
-        sub_split = episode.split(',')
-        for sub in sub_split:
-            #utils.log("Testing for episode title: %s" % sub)
-
-            # Strip the stupid spacing either side
-            sub = sub.lstrip(" ").rstrip(" ")
-
-            # Convert to python compatible short day
-            sub = sub.replace("Tues ", "Tue ")
-            sub = sub.replace("Thurs ", "Thu ")
-            sub = re.sub("March$", "Mar", sub)
-
-            # Not a date - check for episode/series
-            episode = re.search('[Ee]pisode\s?(?P<episode>\d+)', sub)
             if episode:
-                try:
-                    p.episode = int(episode.group('episode'))
-                    #utils.log("%s - Episode found: '%s'" % (sub, p.episode))
-                except:
-                    pass # Not a number. Move on.
+                # Subtitle can be any one of:
+                #    Sun 18 Mar, series 3 episode 30
+                #    Sun 18 March, series 3 episode 30
+                #    Dragon Invasion, series 1 episode 9
+                #    Beyond The Blacklist - Episode 12
+                #    Now on Sundays
+                #    Conan O'Brian, 2001
 
-                # Only check for series if we've previously found episode
-                series = re.search('[Ss](eries|eason)\s?(?P<series>\w+)', sub)
-                if series:
-                    try:
-                        p.season = int(series.group('series'))
-                        #utils.log("%s - Season found: '%s'" % (sub, p.season))
-                    except:
-                        pass # Not a number. Move on.
-            else:
-                try:
-                    # Try parsing the date
-                    date = "%s %s" % (sub, p.get_year())
-                    timestamp = time.mktime(time.strptime(date, '%a %d %b %Y'))
-                    p.date = datetime.date.fromtimestamp(timestamp)
-                    #utils.log("%s - Date found: '%s'" % (sub, p.date))
-                except:
-                    # Not a date or contains 'episode' - must be title
-                    if sub != '':
-                        # Sometimes the actual title has a comma in it. We'll just reconstruct
-                        # the parts in that case
-                        if p.episode_title:
-                            p.episode_title = "%s, %s" % (p.episode_title, sub)
-                        else:
-                            p.episode_title = sub
-                        #utils.log("%s - Episode title found: '%s'" % (sub, p.episode_title))
+                # Replace any MS Word 'dash' instances
+                episode = episode.replace(u'\u2013', u'-')
 
+                # Sometimes they embed unicode
+                episode = episode.encode('ascii', 'ignore')
+
+                # Sometimes they separate with a dash
+                episode = episode.replace(' - ', ' , ')
+
+                sub_split = episode.split(',')
+                for sub in sub_split:
+                    #utils.log("Testing for episode title: %s" % sub)
+
+                    # Strip the stupid spacing either side
+                    sub = sub.lstrip(" ").rstrip(" ")
+
+                    # Convert to python compatible short day
+                    sub = sub.replace("Tues ", "Tue ")
+                    sub = sub.replace("Thurs ", "Thu ")
+                    sub = re.sub("March$", "Mar", sub)
+
+                    # Not a date - check for episode/series
+                    episode = re.search('[Ee]pisode\s?(?P<episode>\d+)', sub)
+                    if episode:
+                        try:
+                            p.episode = int(episode.group('episode'))
+                            #utils.log("%s - Episode found: '%s'" % (sub, p.episode))
+                        except:
+                            pass # Not a number. Move on.
+
+                        # Only check for series if we've previously found episode
+                        series = re.search('[Ss](eries|eason)\s?(?P<series>\w+)', sub)
+                        if series:
+                            try:
+                                p.season = int(series.group('series'))
+                                #utils.log("%s - Season found: '%s'" % (sub, p.season))
+                            except:
+                                pass # Not a number. Move on.
+                    else:
+                        try:
+                            # Try parsing the date
+                            date = "%s %s" % (sub, p.get_year())
+                            timestamp = time.mktime(time.strptime(date, '%a %d %b %Y'))
+                            p.date = datetime.date.fromtimestamp(timestamp)
+                            #utils.log("%s - Date found: '%s'" % (sub, p.date))
+                        except:
+                            # Not a date or contains 'episode' - must be title
+                            if sub != '':
+                                # Sometimes the actual title has a comma in it. We'll just reconstruct
+                                # the parts in that case
+                                if p.episode_title:
+                                    p.episode_title = "%s, %s" % (p.episode_title, sub)
+                                else:
+                                    p.episode_title = sub
+                                #utils.log("%s - Episode title found: '%s'" % (sub, p.episode_title))
+        except:
+            utils.log('Failed to parse program: %s' % program)
 
         program_list.append(p)
 
@@ -199,6 +202,7 @@ def get_program(program_id):
         Fetch the program information and streaming URL for a given
         program ID
     """
+    utils.log("Fetching program information for: %s" % program_id)
     try:
         brightcove_url = "https://api.brightcove.com/services/library?command=find_video_by_reference_id&reference_id=%s&media_delivery=HTTP_IOS&video_fields=id,name,shortDescription,videoStillURL,length,FLVURL,captioning&token=BMG-nlpt1dDQcdqz-EIBAUNRGtXnLQv-gbltLyHgproxck0YUZfnkA.." % program_id
         data = fetch_url(brightcove_url)

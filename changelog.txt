@@ -1,4 +1,8 @@
-[B]Version 2.6[/B]
+[B]Version 2.7[/B]
+- Better fault handling and log reports
+
+[B]Version v2.6[/B]
+- Version 2.6
 - Better handling of missing data and fix for XBMC v12 program list
 
 [B]Version v2.5[/B]

@@ -88,7 +88,7 @@ def get_index():
 
         s = classes.Series()
         s.id = series
-        s.title = series_data[series].get('title')
+        s.title = title
         s.description = series_data[series].get('info')
         s.thumbnail = series_data[series].get('thumbnail')
         series_list.append(s)

@@ -1,4 +1,8 @@
-[B]Version 2.7[/B]
+[B]Version 2.8[/B]
+- Handle unicode chars in logging
+
+[B]Version v2.7[/B]
+- Version 2.7
 - Better fault handling and log reports
 
 [B]Version v2.6[/B]

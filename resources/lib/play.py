@@ -25,6 +25,7 @@ import urllib2
 import xbmc
 import xbmcgui
 import xbmcaddon
+import xbmcplugin
 
 import config
 import utils
@@ -41,7 +42,10 @@ def play(url):
         params = utils.get_url(url)
         p = comm.get_program(params["program_id"])
 
-        listitem=xbmcgui.ListItem(label=p.get_title(), iconImage=p.thumbnail, thumbnailImage=p.thumbnail)
+        listitem=xbmcgui.ListItem(label=p.get_title(),
+                                  iconImage=p.thumbnail,
+                                  thumbnailImage=p.thumbnail,
+                                  path=p.get_url())
         listitem.setInfo('video', p.get_xbmc_list_item())
 
         if hasattr(listitem, 'addStreamInfo'):
@@ -75,7 +79,7 @@ def play(url):
 
         # Play video
         utils.log("Attempting to play: %s" % p.get_title())
-        player.play(p.get_url(), listitem)
+        xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem=listitem)
 
         # Enable subtitles for XBMC v13
         if addon.getSetting('subtitles_enabled') == "true":

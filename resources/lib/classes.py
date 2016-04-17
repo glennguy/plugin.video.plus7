@@ -99,7 +99,8 @@ class Program(object):
         """ Return the program title, including the Series X part
             on the end.
         """
-        return utils.descape(self.title)
+        if self.title:
+            return utils.descape(self.title)
 
     def get_episode_title(self):
         """ Return a string of the shorttitle entry, unless its    not 
@@ -135,7 +136,8 @@ class Program(object):
         """ Return a string the program description, after running it through
             the descape.
         """
-        return utils.descape(self.description)
+        if self.description:
+            return utils.descape(self.description)
 
     def get_category(self):
         """ Return a string of the category. E.g. Comedy
@@ -205,12 +207,14 @@ class Program(object):
     def get_thumbnail(self):
         """ Returns the thumbnail
         """
-        return utils.descape(self.thumbnail)
+        if self.thumbnail:
+            return utils.descape(self.thumbnail)
             
     def get_url(self):
         """ Returns the URL for the video stream
         """
-        return self.url
+        if self.url:
+            return self.url
 
     def get_xbmc_list_item(self):
         """ Returns a dict of program information, in the format which

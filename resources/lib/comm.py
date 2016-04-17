@@ -81,7 +81,7 @@ def get_index():
         title = series_data[series]['title']
 
         # Don't show any 'promo' shows. They don't get returned by Brightcove
-        blacklist = ['Extras', 'healthyMEtv', 'PREVIEW', 'TV Buzz']
+        blacklist = ['Extras', 'healthyMEtv', 'PREVIEW', 'TV Buzz', 'TV Snax']
         if any(x in title for x in blacklist):
             utils.log("Skipping series %s (hide extras)" % title)
             continue

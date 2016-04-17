@@ -183,7 +183,7 @@ def upload_log():
     """
     try:
         log_content = get_xbmc_log()
-    except Execption as e:
+    except Exception as e:
         utils.log("Failed to read log: %s" % e)
         return None
 

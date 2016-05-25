@@ -285,7 +285,7 @@ def download_rendition(rendition_uri, video_id):
         match = re.match('#EXT-X-KEY:METHOD=AES-128,URI="(https://.+?)"', line)
         if match:
             key_url = match.group(1)
-            key_path = os.path.join(temp_dir, "keyfile_%s.key" % md5(key_url).hexdigest())
+            key_path = os.path.join(temp_dir, "keyfile_%s.key" % md5(key_url).hexdigest()).replace('\\', '\\\\')
             keys.append((key_path, key_url))
             rendition_m3u8_file.write('#EXT-X-KEY:METHOD=AES-128,URI="%s"\n' % key_path)
         else:

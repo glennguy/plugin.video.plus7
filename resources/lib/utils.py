@@ -189,6 +189,11 @@ def handle_error(err=None):
     traceback_str = traceback.format_exc()
     log(traceback_str)
     report_issue = False
+
+    # Don't show any dialogs when user cancels
+    if traceback_str.find('SystemExit') > 0:
+        return
+
     d = xbmcgui.Dialog()
     if d:
         message = dialog_error(err)
@@ -197,7 +202,11 @@ def handle_error(err=None):
         send_error = can_send_error(traceback_str)
 
         # Some transient network errors we don't want any reports about
-        if 'possibly unavailable' in traceback_str:
+        if ((traceback_str.find('The read operation timed out') > 0) or
+            (traceback_str.find('IncompleteRead') > 0) or
+            (traceback_str.find('possibly unavailable') > 0) or
+            (traceback_str.find('HTTP Error 401: Unauthorized') > 0) or
+            (traceback_str.find('HTTP Error 404: Not Found') > 0)):
             send_error = False
 
         if send_error:

@@ -103,6 +103,9 @@ def get_series(series_id):
     data = api_query("select * from plus7 where key = '%s' and device = 'ios'" % series_id)
     json_data = json.loads(data)
 
+    if not json_data['query']['results']:
+        return program_list
+    
     program_data = json_data['query']['results']['json']['episodes']
 
     # For single programs, we'll need to force the output to be

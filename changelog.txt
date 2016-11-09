@@ -1,4 +1,8 @@
-[B]Version 3.0.1-3-g0660ab6[/B]
+[B]Version 3.0.0-7-g8c41e8c[/B]
+- Fix addon logging
+- Version 3.0.1
+- Don't allow SystemExit and other user errors for issue reporting
+- Fix NoneType errors for empty episode listings
 - Fix compatibility streaming mode under Windows
 
 [B]Version v3.0.1[/B]

@@ -235,8 +235,8 @@ def get_program(program_id):
             utils.log("Subtitles are available for this program")
             program.subtitle = program_data['captioning']['captionSources'][0]['url']
 
-    if addon and addon.getSetting('video_transport') == 'Native mode (XBMC v13, Kodi v14+)':
-        # Use Apple iOS HLS stream directly
+    if addon and addon.getSetting('video_transport') == "0":
+        # Native mode: use Apple iOS HLS stream directly
         # This requires gnutls support in ffmpeg, which is only found in XBMC v13
         # but not available at all in iOS or Android builds
         utils.log("Using native HTTPS HLS stream handling...")
@@ -251,6 +251,7 @@ def get_program(program_id):
 
 def get_m3u8(video_id):
     brightcove_url = 'http://c.brightcove.com/services/mobile/streaming/index/master.m3u8?videoId=%s' % video_id
+    utils.log("Loading Brightcove playlist: %s" % brightcove_url)
     index_m3u8 = m3u8.load(brightcove_url)
 
     # Get the highest bitrate video

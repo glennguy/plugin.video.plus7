@@ -1,4 +1,5 @@
-[B]Version 3.0.0-7-g8c41e8c[/B]
+[B]Version 3.1.0[/B]
+- Switch to native streaming by default
 - Fix addon logging
 - Version 3.0.1
 - Don't allow SystemExit and other user errors for issue reporting

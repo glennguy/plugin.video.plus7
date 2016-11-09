@@ -1,4 +1,7 @@
-[B]Version 3.0.1[/B]
+[B]Version 3.0.1-3-g0660ab6[/B]
+- Fix compatibility streaming mode under Windows
+
+[B]Version v3.0.1[/B]
 - Don't allow SystemExit and other user errors for issue reporting
 
 [B]Version v3.0.0[/B]

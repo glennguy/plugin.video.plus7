@@ -77,14 +77,18 @@ def ensure_ascii(s):
     return unicodedata.normalize('NFC', s).encode('ascii','ignore')
 
 def log(s):
-    print "[%s v%s] %s" % (config.NAME, config.VERSION, ensure_ascii(s))
+    xbmc.log("[%s v%s] %s" % (config.NAME, config.VERSION, ensure_ascii(s)),
+             level=xbmc.LOGNOTICE)
 
 def log_error(message=None):
     exc_type, exc_value, exc_traceback = sys.exc_info()
     if message:
         exc_value = message
-    print "[%s v%s] ERROR: %s (%d) - %s" % (config.NAME, config.VERSION, exc_traceback.tb_frame.f_code.co_name, exc_traceback.tb_lineno, exc_value)
-    print traceback.print_exc()
+    xbmc.log("[%s v%s] ERROR: %s (%d) - %s" %
+             (config.NAME, config.VERSION,
+              exc_traceback.tb_frame.f_code.co_name, exc_traceback.tb_lineno,
+              exc_value), level=xbmc.LOGERROR)
+    xbmc.log(traceback.print_exc(), level=xbmc.LOGERROR)
 
 def dialog_error(err=None):
     # Generate a list of lines for use in XBMC dialog

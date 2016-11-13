@@ -235,17 +235,17 @@ def get_program(program_id):
             utils.log("Subtitles are available for this program")
             program.subtitle = program_data['captioning']['captionSources'][0]['url']
 
-    if addon and addon.getSetting('video_transport') == "0":
-        # Native mode: use Apple iOS HLS stream directly
-        # This requires gnutls support in ffmpeg, which is only found in XBMC v13
-        # but not available at all in iOS or Android builds
-        utils.log("Using native HTTPS HLS stream handling...")
-        program.url = program_data.get('FLVURL')
-    else:
-        # Use Adam M-W's implementation of handling the HTTPS business within
-        # the m3u8 file directly. He's a legend.
-        utils.log("Using stream compatibility mode...")
-        program.url = get_m3u8(program.id)
+    # Native mode: use Apple iOS HLS stream directly
+    # This requires gnutls support in ffmpeg, which is only found in XBMC v13
+    # but not available at all in older iOS or Android builds
+    utils.log("Using native HTTPS HLS stream handling...")
+    program.url = program_data.get('FLVURL')
+
+    # This method now returning 404s for new programs. Disable completely
+    ## Use Adam M-W's implementation of handling the HTTPS business within
+    ## the m3u8 file directly. He's a legend.
+    #utils.log("Using stream compatibility mode...")
+    #program.url = get_m3u8(program.id)
 
     return program
 

@@ -1,4 +1,6 @@
 [B]Version 3.1.0[/B]
+
+[B]Version v3.1.0[/B]
 - Switch to native streaming by default
 - Fix addon logging
 - Version 3.0.1

@@ -51,7 +51,13 @@ def play(url):
         if hasattr(listitem, 'addStreamInfo'):
             listitem.addStreamInfo('audio', p.get_xbmc_audio_stream_info())
             listitem.addStreamInfo('video', p.get_xbmc_video_stream_info())
-
+        
+        if p.drm_key:
+            listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
+            listitem.setProperty('inputstream.adaptive.manifest_type', 'mpd')
+            listitem.setProperty('inputstream.adaptive.license_type', 'com.widevine.alpha')
+            listitem.setProperty('inputstream.adaptive.license_key', p.drm_key+'|Content-Type=application%2Fx-www-form-urlencoded|A{SSM}|')
+        
         player = xbmc.Player()
 
         # Pull subtitles if available

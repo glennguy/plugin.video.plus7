@@ -88,6 +88,7 @@ class Program(object):
         self.thumbnail = ''
         self.url = None
         self.subtitle = None
+        self.drm_key = None
 
     def __repr__(self):
         return self.title
@@ -233,6 +234,7 @@ class Program(object):
         if self.get_episode():       d['episode'] = self.get_episode()
         if self.get_rating():        d['mpaa'] = self.get_rating()
         if self.get_url():           d['url'] = self.get_url()
+        if self.drm_key:             d['drm_key'] = self.drm_key
         return d
 
     def get_xbmc_audio_stream_info(self):

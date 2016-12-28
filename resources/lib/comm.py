@@ -39,13 +39,13 @@ import classes
 
 addon = xbmcaddon.Addon(config.ADDON_ID)
 
-def fetch_url(url):
+def fetch_url(url, headers=None):
     """
         Simple function that fetches a URL using urllib2.
         An exception is raised if an error (e.g. 404) occurs.
     """
     utils.log("Fetching URL: %s" % url)
-    http = urllib2.urlopen(urllib2.Request(url, None))
+    http = urllib2.urlopen(urllib2.Request(url, None, headers=headers))
     return http.read()
 
 def api_query(query):
@@ -207,8 +207,8 @@ def get_program(program_id):
     """
     utils.log("Fetching program information for: %s" % program_id)
     try:
-        brightcove_url = "https://api.brightcove.com/services/library?command=find_video_by_reference_id&reference_id=%s&media_delivery=HTTP_IOS&video_fields=id,name,shortDescription,videoStillURL,length,FLVURL,captioning&token=BMG-nlpt1dDQcdqz-EIBAUNRGtXnLQv-gbltLyHgproxck0YUZfnkA.." % program_id
-        data = fetch_url(brightcove_url)
+        brightcove_url = config.BRIGHTCOVE_URL.format(config.BRIGHTCOVE_ACCOUNT, program_id)
+        data = fetch_url(brightcove_url, {'BCOV-POLICY': config.BRIGHTCOVE_KEY})
     except:
         raise Exception("Error fetching program information, possibly unavailable.")
 
@@ -226,8 +226,8 @@ def get_program(program_id):
 
     program.id = program_data.get('id')
     program.title = program_data.get('name')
-    program.description = program_data.get('shortDescription')
-    program.thumbnail = program_data.get('videoStillURL')
+    program.description = program_data.get('description')
+    program.thumbnail = program_data.get('thumbnail')
     if program_data.has_key('captioning'):
         if program_data['captioning'] == None:
             utils.log("No subtitles available for this program")
@@ -239,8 +239,15 @@ def get_program(program_id):
     # This requires gnutls support in ffmpeg, which is only found in XBMC v13
     # but not available at all in older iOS or Android builds
     utils.log("Using native HTTPS HLS stream handling...")
-    program.url = program_data.get('FLVURL')
-
+    for source in program_data['sources']:
+        if source.get('container') == 'M2TS':
+            program.url = source.get('src')
+            break
+        elif source.get('container') == None:
+            if 'key_systems' in source:
+                if 'com.widevine.alpha' in source['key_systems']:
+                    program.url = source.get('src')
+                    program.drm_key = source['key_systems']['com.widevine.alpha']['license_url']
     # This method now returning 404s for new programs. Disable completely
     ## Use Adam M-W's implementation of handling the HTTPS business within
     ## the m3u8 file directly. He's a legend.

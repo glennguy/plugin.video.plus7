@@ -29,17 +29,17 @@ ISSUE_API_URL = GITHUB_API_URL + '/issues'
 ISSUE_API_AUTH = 'eGJtY2JvdDo1OTQxNTJjMTBhZGFiNGRlN2M0YWZkZDYwZGQ5NDFkNWY4YmIzOGFj'
 GIST_API_URL = 'https://api.github.com/gists'
 
-BRIGHTCOVE_URL = "https://edge.api.brightcove.com/playback/v1/accounts/{0}/videos/ref:{1}"
+BRIGHTCOVE_URL = 'https://edge.api.brightcove.com/playback/v1/accounts/{0}/videos/ref:{1}'
 BRIGHTCOVE_KEY = 'BCpkADawqM23Rsu_vHPRKbrIicm3fvl2i33Q_d5KoWIQ1hAlTrmpbAbKyZWXQiZ_kbgJZ7DulFHPCscZmi-4Z_OsylPgPi3h8pnYWRwbKrstrrJt08gS8vYGG8aTRA87y6VhscthRz2ZUDTh'
 BRIGHTCOVE_ACCOUNT = "2376984108001"
 api_url = 'https://y7mobile.query.yahoo.com/v1/yql'
 oauth_consumer_key = 'dj0yJmk9QWJodDF5WDVnTGhwJmQ9WVdrOU1HODNiVXB0TnpnbWNHbzlNVGc0TWpnMk5UUTJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD04Yw--'
 oauth_consumer_secret = '0e4a80fc03b8ff1ed74a68a8dc583e77ff9e279b'
 
-SSD_WV_REPO = "https://github.com/glennguy/decryptmodules/raw/master/"
+SSD_WV_REPO = 'https://github.com/glennguy/decryptmodules/raw/master/'
 WIDEVINECDM_URL = { 'Linuxx86_64': 'https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb',
                     'Linuxarmv7': 'http://odroidxu.leeharris.me.uk/xu3/chromium-widevine-1.4.8.823-2-armv7h.pkg.tar.xz',
-                    'Linuxarmv7': 'http://odroidxu.leeharris.me.uk/xu3/chromium-widevine-1.4.8.823-2-armv7h.pkg.tar.xz'}
+                    'Linuxarmv8': 'http://odroidxu.leeharris.me.uk/xu3/chromium-widevine-1.4.8.823-2-armv7h.pkg.tar.xz'}
 
 UNARCHIVE_COMMAND = { 'Linuxx86_64': "(cd {1} && ar x {0} data.tar.xz && tar xJfO data.tar.xz ./opt/google/chrome/libwidevinecdm.so >{1}/{2} && chmod 755 {1}/{2} && rm -f data.tar.xz {0})",
                       'Linuxarmv7': "(cd {1} && tar xJfO {0} usr/lib/chromium/libwidevinecdm.so >{1}/{2} && chmod 755 {1}/{2} && rm -f {0})",

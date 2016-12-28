@@ -34,7 +34,6 @@ system_ = platform.system()
 arch = platform.machine()
 if arch[:3] == 'arm':
     arch = arch[:5]
-git_url = config.SSD_WV_REPO
 
 if system_+arch in config.SUPPORTED_PLATFORMS:
     supported = True
@@ -74,8 +73,8 @@ def check_inputstream():
         return False
 
     if not is_widevinecdm():
-        msg1 =  'Missing widevinecdm module required for DRM content'
-        msg2 =  '{0} not found in {1}'.format(config.WIDEVINECDM_DICT[system_],
+        msg1 = 'Missing widevinecdm module required for DRM content'
+        msg2 = '{0} not found in {1}'.format(config.WIDEVINECDM_DICT[system_],
                 xbmc.translatePath(addon.getSetting('DECRYPTERPATH')))  
         msg3 = ('Do you want to attempt downloading the missing widevinecdm'
                 ' module for your system?')
@@ -87,9 +86,9 @@ def check_inputstream():
             return False
 
     if not is_ssd_wv():
-        msg1 =  'Missing ssd_wv module required for DRM content'
-        msg2 =  '{0} not found in {1}'.format(config.SSD_WV_DICT[system_],
-                 xbmc.translatePath(addon.getSetting('DECRYPTERPATH')))
+        msg1 = 'Missing ssd_wv module required for DRM content'
+        msg2 = '{0} not found in {1}'.format(config.SSD_WV_DICT[system_],
+                xbmc.translatePath(addon.getSetting('DECRYPTERPATH')))
         msg2 = ('Do you want to attempt downloading the missing ssd_wv'
                 ' module for your system?')
         if xbmcgui.Dialog().yesno(msg1, msg2):
@@ -189,7 +188,7 @@ def get_widevinecdm():
 def get_ssd_wv():
     """ Download compiled ssd_wv from github repository
     """
-    url = posixpath.join(git_url, system_, arch, ssd_filename)
+    url = posixpath.join(config.SSD_WV_REPO, system_, arch, ssd_filename)
     download_path = os.path.join(cdm_path, ssd_filename)
 
     if not progress_download(url, download_path, ssd_filename):
@@ -226,6 +225,6 @@ def progress_download(url, download_path, filename):
                 res.close()
             dp.update(percent)
     xbmc.log('Download {0} bytes complete, saved in {1}'.format(
-                int(total_length), download_path),xbmc.LOGNOTICE)
+                int(total_length), download_path), xbmc.LOGNOTICE)
     dp.close()
     return True

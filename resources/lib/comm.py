@@ -72,15 +72,15 @@ def get_categories():
         Fetch list of all shows divided by genre
     """
     categories_list = []
-    data = fetch_url(config.showlist_url)
+    data = api_query("select * from plus7.showlist where device = 'ios'")
     json_data = json.loads(data)
-    
-    genre_data = json_data['plus7shows']['result'][0]['genre']
-    
+    genre_data = json_data['query']['results']['json']['genre']
+
     for genre in genre_data.keys():
-        categories_list.append(genre)
-    if '' in categories_list:
-        categories_list.remove('')
+        utils.log('genre is "{}"'.format(genre))
+        categories_list.append(genre.replace('_', ' '))
+    if ' ' in categories_list:
+        categories_list.remove(' ')
     if 'TV Snax' in categories_list:
         categories_list.remove('TV Snax')
     return categories_list

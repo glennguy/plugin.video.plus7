@@ -35,7 +35,6 @@ BRIGHTCOVE_LIVE_KEY = 'BCpkADawqM3Ty0dStHsYNCVbgBXlEbdnC6vZah6As39gvutM2aTiYRIV5
 BRIGHTCOVE_ACCOUNT = '2376984108001'
 BRIGHTCOVE_LIVE_ACCOUNT = '4456740435001'
 api_url = 'https://y7mobile.query.yahoo.com/v1/yql'
-showlist_url= 'https://y7mobile.query.yahoo.com/v1/plus7/shows/public?device=play'
 live_url = 'https://y7mobile.query.yahoo.com/v1/livestream/postcode/{0}'
 oauth_consumer_key = 'dj0yJmk9QWJodDF5WDVnTGhwJmQ9WVdrOU1HODNiVXB0TnpnbWNHbzlNVGc0TWpnMk5UUTJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD04Yw--'
 oauth_consumer_secret = '0e4a80fc03b8ff1ed74a68a8dc583e77ff9e279b'

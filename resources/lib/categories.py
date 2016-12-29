@@ -29,7 +29,9 @@ def make_categories_list():
     try:
         categories_list = comm.get_categories()
         categories_list.sort()
-        
+        categories_list.insert(0, 'Live TV')
+        categories_list.insert(0, 'All TV Shows')
+
         for category in categories_list:
             url = '{0}?category={1}'.format(sys.argv[0], category)
             listitem = xbmcgui.ListItem(label=category)

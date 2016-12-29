@@ -72,8 +72,6 @@ def get_categories():
         Fetch list of all shows divided by genre
     """
     categories_list = []
-    categories_list.append('All TV Shows')
-    categories_list.append('Live TV')
     data = fetch_url(config.showlist_url)
     json_data = json.loads(data)
     

@@ -100,17 +100,23 @@ def check_inputstream():
 
 def is_widevinecdm():
     """ Check for (lib)widevinecdm.dll/so/dylib"""
-    for file in os.listdir(cdm_path):
-        if 'widevinecdm' in file:
-            return True
-    return False
+    if os.path.isdir(cdm_path):
+        for file in os.listdir(cdm_path):
+            if 'widevinecdm' in file:
+                return True
+        return False
+    else:
+        return False
 
 def is_ssd_wv():
     """ Check for (lib)ssd_wv.dll/so/dylib"""
-    for file in os.listdir(cdm_path):
-        if 'ssd_wv' in file:
-            return True
-    return False
+    if os.path.isdir(cdm_path):
+        for file in os.listdir(cdm_path):
+            if 'ssd_wv' in file:
+                return True
+        return False
+    else:
+        return False
 
 def get_crx_url():
     """ Send Chrome extension update request to google, take first url from 
@@ -159,6 +165,9 @@ def get_widevinecdm():
         filename = url.split('/')[-1]
         xbmc.log(filename, level=xbmc.LOGNOTICE)
 
+    if not os.path.isdir(cdm_path):
+        os.makedirs(cdm_path)
+
     download_path = os.path.join(cdm_path, filename)
 
     if not progress_download(url, download_path, widevinecdm_filename):
@@ -189,6 +198,10 @@ def get_ssd_wv():
     """ Download compiled ssd_wv from github repository
     """
     url = posixpath.join(config.SSD_WV_REPO, system_, arch, ssd_filename)
+    
+    if not os.path.isdir(cdm_path):
+        os.makedirs(cdm_path)
+
     download_path = os.path.join(cdm_path, ssd_filename)
 
     if not progress_download(url, download_path, ssd_filename):

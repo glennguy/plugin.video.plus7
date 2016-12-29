@@ -27,6 +27,7 @@ import urllib2
 
 import xbmc
 import xbmcaddon
+import xbmcgui
 
 import m3u8
 import oauth2 as oauth
@@ -39,7 +40,7 @@ import classes
 
 addon = xbmcaddon.Addon(config.ADDON_ID)
 
-def fetch_url(url, headers=None):
+def fetch_url(url, headers={}):
     """
         Simple function that fetches a URL using urllib2.
         An exception is raised if an error (e.g. 404) occurs.
@@ -66,6 +67,26 @@ def api_query(query):
     rs = urllib2.urlopen(req.to_url())
     return rs.read()
 
+def get_categories():
+    """
+        Fetch list of all shows divided by genre
+    """
+    categories_list = []
+    categories_list.append('All TV Shows')
+    categories_list.append('Live TV')
+    data = fetch_url(config.showlist_url)
+    json_data = json.loads(data)
+    
+    genre_data = json_data['plus7shows']['result'][0]['genre']
+    
+    for genre in genre_data.keys():
+        categories_list.append(genre)
+    if '' in categories_list:
+        categories_list.remove('')
+    if 'TV Snax' in categories_list:
+        categories_list.remove('TV Snax')
+    return categories_list
+        
 def get_index():
     """
         Fetch the index of all shows available
@@ -91,6 +112,7 @@ def get_index():
         s.title = title
         s.description = series_data[series].get('info')
         s.thumbnail = series_data[series].get('thumbnail')
+        s.genre = list(series_data[series].get('genre').split(','))
         series_list.append(s)
 
     return series_list
@@ -200,15 +222,21 @@ def get_series(series_id):
     return program_list
 
 
-def get_program(program_id):
+def get_program(program_id, live=False):
     """
         Fetch the program information and streaming URL for a given
         program ID
     """
     utils.log("Fetching program information for: %s" % program_id)
+    if live:
+        account = config.BRIGHTCOVE_LIVE_ACCOUNT
+        key = config.BRIGHTCOVE_LIVE_KEY
+    else:
+        account = config.BRIGHTCOVE_ACCOUNT
+        key = config.BRIGHTCOVE_KEY
     try:
-        brightcove_url = config.BRIGHTCOVE_URL.format(config.BRIGHTCOVE_ACCOUNT, program_id)
-        data = fetch_url(brightcove_url, {'BCOV-POLICY': config.BRIGHTCOVE_KEY})
+        brightcove_url = config.BRIGHTCOVE_URL.format(account, program_id)
+        data = fetch_url(brightcove_url, {'BCOV-POLICY': key})
     except:
         raise Exception("Error fetching program information, possibly unavailable.")
 
@@ -238,16 +266,17 @@ def get_program(program_id):
     # Native mode: use Apple iOS HLS stream directly
     # This requires gnutls support in ffmpeg, which is only found in XBMC v13
     # but not available at all in older iOS or Android builds
-    utils.log("Using native HTTPS HLS stream handling...")
     for source in program_data['sources']:
         if source.get('container') == 'M2TS':
             program.url = source.get('src')
+            utils.log("Using HLS stream...")
             break
         elif source.get('container') == None:
             if 'key_systems' in source:
                 if 'com.widevine.alpha' in source['key_systems']:
                     program.url = source.get('src')
                     program.drm_key = source['key_systems']['com.widevine.alpha']['license_url']
+                    utils.log("Using MPEG DASH stream...")
     # This method now returning 404s for new programs. Disable completely
     ## Use Adam M-W's implementation of handling the HTTPS business within
     ## the m3u8 file directly. He's a legend.
@@ -255,6 +284,36 @@ def get_program(program_id):
     #program.url = get_m3u8(program.id)
 
     return program
+
+def get_live():
+    post_code = addon.getSetting('post_code')
+    if post_code == '':
+        xbmcgui.Dialog().ok('Post code not set',
+                         'Please enter your post code to view live streams')
+        addon.openSettings()
+        post_code = addon.getSetting('post_code')
+    utils.log(post_code)
+    url = config.live_url.format(post_code)
+    data = fetch_url(url)
+    json_data = json.loads(data)
+    if json_data['channels']['result'][0]['valid_postcode'] == False:
+        utils.log('Invalid Post Code')
+        xbmcgui.Dialog().ok('Invalid Post Code', 
+                            'Please enter a valid post code and try again')
+        addon.openSettings()
+        return
+        
+    channel_list = []
+    
+    for channel in json_data['channels']['result'][0]['asset']:
+        c = classes.Program()
+        c.thumbnail = channel['thumbnails']['large'].get('url')
+        c.title = channel.get('title')
+        c.description = channel['tvapiData']['schedule'][0].get('title')
+        c.id = channel.get('thread_id')
+        channel_list.append(c)
+        
+    return channel_list
 
 def get_m3u8(video_id):
     brightcove_url = 'http://c.brightcove.com/services/mobile/streaming/index/master.m3u8?videoId=%s' % video_id

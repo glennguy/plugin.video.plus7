@@ -40,7 +40,7 @@ addon = xbmcaddon.Addon()
 def play(url):
     try:
         params = utils.get_url(url)
-        p = comm.get_program(params["program_id"])
+        p = comm.get_program(params["program_id"], params.has_key('live'))
 
         listitem=xbmcgui.ListItem(label=p.get_title(),
                                   iconImage=p.thumbnail,

@@ -285,11 +285,6 @@ def get_program(program_id, live=False):
 
 def get_live():
     post_code = addon.getSetting('post_code')
-    if post_code == '':
-        xbmcgui.Dialog().ok('Post code not set',
-                         'Please enter your post code to view live streams')
-        addon.openSettings()
-        post_code = addon.getSetting('post_code')
     utils.log(post_code)
     url = config.live_url.format(post_code)
     data = fetch_url(url)

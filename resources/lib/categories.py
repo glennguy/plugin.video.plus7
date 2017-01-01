@@ -24,35 +24,21 @@ import xbmcplugin
 import comm
 import utils
 
-
-def make_series_list(url):
-    utils.log('Showing series list')
+def make_categories_list():
+    utils.log('Showing category list')
     try:
-        params = utils.get_url(url)
-        series_list = comm.get_index()            
-        series_list.sort()
+        categories_list = comm.get_categories()
+        categories_list.sort()
+        categories_list.insert(0, 'Live TV')
+        categories_list.insert(0, 'All TV Shows')
 
-        ok = True
-        for s in series_list:
-            if params['category'] == 'All TV Shows':
-                pass
-            else:
-                if params['category'] not in s.genre:
-                    continue
-            url = "%s?series_id=%s" % (sys.argv[0], s.id)
-            thumbnail = s.get_thumbnail()
-
-            # Thumbnail that doesn't exist breaks XBMC 12
-            listitem = xbmcgui.ListItem(s.get_title())
-            if thumbnail:
-                listitem = xbmcgui.ListItem(s.get_title(), iconImage=thumbnail, thumbnailImage=thumbnail)
-
-            listitem.setInfo('video', { 'plot' : s.get_description() })
-
-            # add the item to the media list
+        for category in categories_list:
+            url = '{0}?category={1}'.format(sys.argv[0], category)
+            listitem = xbmcgui.ListItem(label=category)
+        
             ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=True)
 
         xbmcplugin.endOfDirectory(handle=int(sys.argv[1]), succeeded=ok)
         xbmcplugin.setContent(handle=int(sys.argv[1]), content='tvshows')
     except:
-        utils.handle_error("Unable to fetch series listing")
+        utils.handle_error("Unable to show category listing")

@@ -30,9 +30,11 @@ pypath = os.path.join(current_dir, 'resources', 'lib')
 sys.path.append(pypath)
 
 import utils
+import categories
 import series
 import programs
 import play
+import live
 
 # Print our platform/version debugging information
 utils.log_xbmc_platform_version()
@@ -42,8 +44,13 @@ if __name__ == "__main__" :
     params = utils.get_url(params_str)
 
     if (len(params) == 0):
-        series.make_series_list()
+        categories.make_categories_list()
     else:
+        if params.has_key("category"):
+            if params['category'] == 'Live TV':
+                live.make_live_list(params_str)
+            else:
+                series.make_series_list(params_str)
         if params.has_key("series_id"):
             programs.make_programs_list(params_str)
         elif params.has_key("program_id"):

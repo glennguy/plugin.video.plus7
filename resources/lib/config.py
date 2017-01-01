@@ -31,8 +31,11 @@ GIST_API_URL = 'https://api.github.com/gists'
 
 BRIGHTCOVE_URL = 'https://edge.api.brightcove.com/playback/v1/accounts/{0}/videos/ref:{1}'
 BRIGHTCOVE_KEY = 'BCpkADawqM23Rsu_vHPRKbrIicm3fvl2i33Q_d5KoWIQ1hAlTrmpbAbKyZWXQiZ_kbgJZ7DulFHPCscZmi-4Z_OsylPgPi3h8pnYWRwbKrstrrJt08gS8vYGG8aTRA87y6VhscthRz2ZUDTh'
-BRIGHTCOVE_ACCOUNT = "2376984108001"
+BRIGHTCOVE_LIVE_KEY = 'BCpkADawqM3Ty0dStHsYNCVbgBXlEbdnC6vZah6As39gvutM2aTiYRIV5ZyJH4WTWRedIYgjbdrC7Hk6Mvdx3nddTtTCcJzP-KXbkprsB0PWpdx7NQyTfdU-RfWkfg_ymolet0kzHBf8taPO'
+BRIGHTCOVE_ACCOUNT = '2376984108001'
+BRIGHTCOVE_LIVE_ACCOUNT = '4456740435001'
 api_url = 'https://y7mobile.query.yahoo.com/v1/yql'
+live_url = 'https://y7mobile.query.yahoo.com/v1/livestream/postcode/{0}'
 oauth_consumer_key = 'dj0yJmk9QWJodDF5WDVnTGhwJmQ9WVdrOU1HODNiVXB0TnpnbWNHbzlNVGc0TWpnMk5UUTJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD04Yw--'
 oauth_consumer_secret = '0e4a80fc03b8ff1ed74a68a8dc583e77ff9e279b'
 

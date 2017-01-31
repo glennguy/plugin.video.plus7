@@ -62,7 +62,7 @@ def play(url):
                 listitem.setProperty('inputstream.adaptive.license_key', p.drm_key+'|Content-Type=application%2Fx-www-form-urlencoded|A{SSM}|')
             
             else:
-                xbmcplugin.setResolvedUrl(_handle, True, xbmcgui.ListItem(path=None))
+                xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path=None))
                 return
             
         player = xbmc.Player()

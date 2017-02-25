@@ -9,59 +9,44 @@ like Unblock-US, UnoTelly or Tunlr.net (free). or your own VPN solution which
 terminates in with an AU IP address.
 
 This addon relies on the mobile stream for iOS and Android. This used the HLS
-stream, which requires HTTPS support. We support native support for new
-platforms (XBMC v13 Gotham, excluding Android and iOS), but provide a fallback for
-other platforms (e.g. XBMC v12 Frodo and Android/iOS builds).
+stream, which requires HTTPS support, and should work on most platforms.
 
 Thanks for contributions from:
   * Adam M-W
   * nunoidev
+  * Glenn Guy
 
 Installation
 ------------
-The latest stable release of this add-on is available as part of the
-[XBMC CatchUp TV AU repository] [repository].
+First step is the grab the [repo ZIP file] [download].
 
-For the latest development version, you can grab the [GitHub generated ZIP file] [githubzip].
+Simply download the ZIP file to your Kodi device and install through the menu via:
 
-Simply download the ZIP file to your Kodi/XBMC device and install through the menu via
+System -> Settings -> Add-ons -> Install from zip file.
 
-System -> Settings -> Add-ons -> Install from zip file
+The Kodi wiki has a good [walk-through guide to installing ZIP files] [installzip] if you get stuck.
+
+Once the repository ZIP file is installed, you can install the individual add-ons through the Kodi Add-on manager:
+
+System -> Settings -> Add-ons -> Catch-Up TV AU -> Select the add-on category -> Select the add-on -> Install
+
+The Kodi wiki also has a nice guide on [installing Add-ons via the Add-on manager] [addonmanager].
 
 Issues
 ------
-If you find an issue, please test with the latest version of Kodi. I would
-recommend Kodi v14 or later.
+For any issues or bug reports, please file them on the [issues page] [issues].
+Please include log output, if possible. Follow the [log upload guide] [logupload] and include the URL it gives you in your bug report.
 
-If you're using a Raspberry Pi or another dedicated HTPC, I would recommend
-using [OpenELEC] [openelec].
+Contact
+-------
+For help and support, feel free to register on our [Slack channel] [slack].
 
-For any other issues or bug reports, please file them on the [issues page] [issues].
+Good luck and happy viewing.
 
-Please include log output if possible, using Github Gist or Pastebin.com.
-
-The location of your log file will depend on your platform.
-
-For Windows:
-```
-%APPDATA%\kodi\temp\xbmc.log
-```
-
-For Linux:
-```
-~/.kodi/temp/kodi.log
-```
-
-For Mac OS X:
-```
-~/Library/Application Support/Kodi/temp/kodi.log
-```
-
-Contact Me
-----------
-For anything else, you can contact me by email at andy#andybotting.com
-
-[repository]: http://code.google.com/p/xbmc-catchuptv-au
-[githubzip]: https://github.com/andybotting/xbmc-addon-plus7/archive/master.zip
-[openelec]: http://openelec.tv/
+[repository]: https://github.com/xbmc-catchuptv-au/repo
+[download]: https://github.com/xbmc-catchuptv-au/repo/tree/master/plugin.video.plus7
 [issues]: https://github.com/andybotting/xbmc-addon-plus7/issues
+[installzip]: http://kodi.wiki/view/HOW-TO:Install_add-ons_from_zip_files
+[addonmanager]: http://kodi.wiki/view/Add-on_manager
+[logupload]: http://kodi.wiki/view/Log_file/Easy
+[slack]: http://slack-invite.aussieaddons.com/

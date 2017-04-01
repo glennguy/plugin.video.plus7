@@ -32,7 +32,7 @@ import utils
 import classes
 import comm
 
-from pycaption import DFXPReader, SRTWriter
+from pycaption import WebVTTReader, SRTWriter
 
 
 addon = xbmcaddon.Addon()
@@ -77,11 +77,11 @@ def play(url):
                 if not os.path.isdir(profiledir):
                     os.makedirs(profiledir)
 
-                dfxp_data = urllib2.urlopen(p.subtitle).read().decode('utf-8')
-                if dfxp_data:
+                webvtt_data = urllib2.urlopen(p.subtitle).read().decode('utf-8')
+                if webvtt_data:
                     f = open(subfilename, 'w')
-                    dfxp_subtitle = DFXPReader().read(dfxp_data)
-                    srt_subtitle = SRTWriter().write(dfxp_subtitle)
+                    webvtt_subtitle = WebVTTReader().read(webvtt_data)
+                    srt_subtitle = SRTWriter().write(webvtt_subtitle)
                     srt_unicode = srt_subtitle.encode('utf-8')
                     f.write(srt_unicode)
                     f.close()

@@ -253,33 +253,39 @@ def get_program(program_id, live=False):
     program.title = program_data.get('name')
     program.description = program_data.get('description')
     program.thumbnail = program_data.get('thumbnail')
-    if program_data.has_key('captioning'):
-        if program_data['captioning'] == None:
+    if program_data.has_key('text_tracks'):
+        if len(program_data['text_tracks']) == 0:
             utils.log("No subtitles available for this program")
         else:
             utils.log("Subtitles are available for this program")
-            program.subtitle = program_data['captioning']['captionSources'][0]['url']
+            program.subtitle = program_data['text_tracks'][0].get('src')
 
-    # Native mode: use Apple iOS HLS stream directly
-    # This requires gnutls support in ffmpeg, which is only found in XBMC v13
-    # but not available at all in older iOS or Android builds
+    # Try for MP4 file first
+    mp4_list = []
     for source in program_data['sources']:
-        if source.get('container') == 'M2TS':
-            program.url = source.get('src')
-            utils.log("Using HLS stream...")
-            break
-        elif source.get('container') == None:
+        if source.get('container') == 'MP4':
+            src = source.get('src')
+            if src:
+                res = source.get('height')
+                mp4_list.append({'SRC': src, 'RES': res})
+    if len(mp4_list) > 0:
+        sorted_mp4_list = sorted(mp4_list, key=lambda x: x['RES'], reverse=True)
+        stream = sorted_mp4_list[0]
+        program.url = stream['SRC']
+        utils.log(stream)
+        if program.url:
+            utils.log("Using {0}p MP4 stream".format(stream['RES']))
+            return program
+    
+    # If no MP4 streams available, use DASH/Widevine
+    for source in program_data['sources']:
+        if source.get('container') == None:
             if 'key_systems' in source:
                 if 'com.widevine.alpha' in source['key_systems']:
                     program.url = source.get('src')
                     program.drm_key = source['key_systems']['com.widevine.alpha']['license_url']
                     utils.log("Using MPEG DASH stream...")
-    # This method now returning 404s for new programs. Disable completely
-    ## Use Adam M-W's implementation of handling the HTTPS business within
-    ## the m3u8 file directly. He's a legend.
-    #utils.log("Using stream compatibility mode...")
-    #program.url = get_m3u8(program.id)
-
+    
     return program
 
 def get_live():

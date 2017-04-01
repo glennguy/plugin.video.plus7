@@ -253,12 +253,12 @@ def get_program(program_id, live=False):
     program.title = program_data.get('name')
     program.description = program_data.get('description')
     program.thumbnail = program_data.get('thumbnail')
-    if program_data.has_key('captioning'):
-        if program_data['captioning'] == None:
+    if program_data.has_key('text_tracks'):
+        if len(program_data['text_tracks']) == 0:
             utils.log("No subtitles available for this program")
         else:
             utils.log("Subtitles are available for this program")
-            program.subtitle = program_data['captioning']['captionSources'][0]['url']
+            program.subtitle = program_data['text_tracks'][0].get('src')
 
     # Try for MP4 file first
     mp4_list = []

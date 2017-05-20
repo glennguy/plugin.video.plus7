@@ -21,23 +21,24 @@ import sys
 import utils
 import comm
 import config
-
 import xbmcgui
 import xbmcplugin
 import xbmcaddon
 
 addon = xbmcaddon.Addon(config.ADDON_ID)
 
+
 def make_live_list(url):
     try:
-        params = utils.get_url(url)
         channels = comm.get_live()
+        if not channels:
+            return
 
         utils.log('Showing live channel list for postcode {0}'.format(
                                         addon.getSetting('post_code')))
         ok = True
         for c in channels:
-            
+
             listitem = xbmcgui.ListItem(label=c.get_list_title(),
                                         iconImage=c.get_thumbnail(),
                                         thumbnailImage=c.get_thumbnail())
@@ -50,10 +51,13 @@ def make_live_list(url):
 
             # Build the URL for the program, including the list_info
             url = '{0}?program_id={1}&live=true'.format(sys.argv[0], c.id)
-            
-            # Add the program item to the list 
-            ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=False)
-            
+
+            # Add the program item to the list
+            ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),
+                                             url=url,
+                                             listitem=listitem,
+                                             isFolder=False)
+
         xbmcplugin.endOfDirectory(handle=int(sys.argv[1]), succeeded=ok)
         xbmcplugin.setContent(handle=int(sys.argv[1]), content='episodes')
     except:

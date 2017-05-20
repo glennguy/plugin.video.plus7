@@ -24,21 +24,18 @@ import threading
 import time
 import urllib
 import urllib2
-
 import xbmc
 import xbmcaddon
 import xbmcgui
-
-import m3u8
-import oauth2 as oauth
-
-from hashlib import md5
-
 import config
 import utils
 import classes
+import m3u8
+import oauth2 as oauth
+from hashlib import md5
 
 addon = xbmcaddon.Addon(config.ADDON_ID)
+
 
 def fetch_url(url, headers={}):
     """
@@ -48,6 +45,7 @@ def fetch_url(url, headers={}):
     utils.log("Fetching URL: %s" % url)
     http = urllib2.urlopen(urllib2.Request(url, None, headers=headers))
     return http.read()
+
 
 def api_query(query):
 
@@ -59,13 +57,15 @@ def api_query(query):
         'q': query
     }
 
-    consumer = oauth.Consumer(key=config.oauth_consumer_key, secret=config.oauth_consumer_secret)
+    consumer = oauth.Consumer(key=config.oauth_consumer_key,
+                              secret=config.oauth_consumer_secret)
     params['oauth_consumer_key'] = consumer.key
     req = oauth.Request(method="GET", url=config.api_url, parameters=params)
     signature_method = oauth.SignatureMethod_HMAC_SHA1()
     req.sign_request(signature_method, consumer, None)
     rs = urllib2.urlopen(req.to_url())
     return rs.read()
+
 
 def get_categories():
     """
@@ -83,7 +83,8 @@ def get_categories():
     if 'TV Snax' in categories_list:
         categories_list.remove('TV Snax')
     return categories_list
-        
+
+
 def get_index():
     """
         Fetch the index of all shows available
@@ -114,17 +115,19 @@ def get_index():
 
     return series_list
 
+
 def get_series(series_id):
     """
         Fetch the episode list for a given series ID
     """
     program_list = []
-    data = api_query("select * from plus7 where key = '%s' and device = 'ios'" % series_id)
+    data = api_query("select * from plus7 where key = '%s' and device = 'ios'"
+                     % series_id)
     json_data = json.loads(data)
 
     if not json_data['query']['results']:
         return program_list
-    
+
     program_data = json_data['query']['results']['json']['episodes']
 
     # For single programs, we'll need to force the output to be
@@ -167,7 +170,7 @@ def get_series(series_id):
 
                 sub_split = episode.split(',')
                 for sub in sub_split:
-                    #utils.log("Testing for episode title: %s" % sub)
+                    # utils.log("Testing for episode title: %s" % sub)
 
                     # Strip the stupid spacing either side
                     sub = sub.lstrip(" ").rstrip(" ")
@@ -182,35 +185,35 @@ def get_series(series_id):
                     if episode:
                         try:
                             p.episode = int(episode.group('episode'))
-                            #utils.log("%s - Episode found: '%s'" % (sub, p.episode))
                         except:
-                            pass # Not a number. Move on.
+                            pass  # Not a number. Move on.
 
-                        # Only check for series if we've previously found episode
-                        series = re.search('[Ss](eries|eason)\s?(?P<series>\w+)', sub)
+                        # Only check for series if we've previously
+                        # found episode
+                        series = re.search(
+                            '[Ss](eries|eason)\s?(?P<series>\w+)', sub)
                         if series:
                             try:
                                 p.season = int(series.group('series'))
-                                #utils.log("%s - Season found: '%s'" % (sub, p.season))
                             except:
-                                pass # Not a number. Move on.
+                                pass  # Not a number. Move on.
                     else:
                         try:
                             # Try parsing the date
                             date = "%s %s" % (sub, p.get_year())
-                            timestamp = time.mktime(time.strptime(date, '%a %d %b %Y'))
+                            timestamp = time.mktime(
+                                time.strptime(date, '%a %d %b %Y'))
                             p.date = datetime.date.fromtimestamp(timestamp)
-                            #utils.log("%s - Date found: '%s'" % (sub, p.date))
                         except:
                             # Not a date or contains 'episode' - must be title
                             if sub != '':
-                                # Sometimes the actual title has a comma in it. We'll just reconstruct
-                                # the parts in that case
+                                # Sometimes the actual title has a comma in it.
+                                # We'll just reconstruct the parts in that case
                                 if p.episode_title:
-                                    p.episode_title = "%s, %s" % (p.episode_title, sub)
+                                    p.episode_title = "%s, %s" % (
+                                        p.episode_title, sub)
                                 else:
                                     p.episode_title = sub
-                                #utils.log("%s - Episode title found: '%s'" % (sub, p.episode_title))
         except:
             utils.log('Failed to parse program: %s' % program)
 
@@ -235,11 +238,13 @@ def get_program(program_id, live=False):
         brightcove_url = config.BRIGHTCOVE_URL.format(account, program_id)
         data = fetch_url(brightcove_url, {'BCOV-POLICY': key})
     except:
-        raise Exception("Error fetching program information, possibly unavailable.")
+        raise Exception("Error fetching program information, "
+                        "possibly unavailable.")
 
     if data == 'null':
         utils.log("Brightcove returned: '%s'" % data)
-        raise Exception("Error fetching program information, possibly unavailable.")
+        raise Exception("Error fetching program information, "
+                        "possibly unavailable.")
 
     try:
         program_data = json.loads(data)
@@ -253,7 +258,7 @@ def get_program(program_id, live=False):
     program.title = program_data.get('name')
     program.description = program_data.get('description')
     program.thumbnail = program_data.get('thumbnail')
-    if program_data.has_key('text_tracks'):
+    if 'text_tracks' in program_data:
         if len(program_data['text_tracks']) == 0:
             utils.log("No subtitles available for this program")
         else:
@@ -263,30 +268,42 @@ def get_program(program_id, live=False):
     # Try for MP4 file first
     mp4_list = []
     for source in program_data['sources']:
+        if live:
+            index_m3u8 = m3u8.load(source.get('src'))
+            # Get the highest bitrate video
+            program.url = (sorted(
+                index_m3u8.playlists,
+                key=lambda playlist: int(playlist.stream_info.bandwidth))
+                    [-1].uri)
+            return program
         if source.get('container') == 'MP4':
             src = source.get('src')
             if src:
                 res = source.get('height')
                 mp4_list.append({'SRC': src, 'RES': res})
     if len(mp4_list) > 0:
-        sorted_mp4_list = sorted(mp4_list, key=lambda x: x['RES'], reverse=True)
+        sorted_mp4_list = sorted(mp4_list,
+                                 key=lambda x: x['RES'],
+                                 reverse=True)
         stream = sorted_mp4_list[0]
         program.url = stream['SRC']
         utils.log(stream)
         if program.url:
             utils.log("Using {0}p MP4 stream".format(stream['RES']))
             return program
-    
+
     # If no MP4 streams available, use DASH/Widevine
     for source in program_data['sources']:
-        if source.get('container') == None:
+        if source.get('container') is None:
             if 'key_systems' in source:
                 if 'com.widevine.alpha' in source['key_systems']:
                     program.url = source.get('src')
-                    program.drm_key = source['key_systems']['com.widevine.alpha']['license_url']
+                    program.drm_key = (source['key_systems']
+                                             ['com.widevine.alpha']
+                                             ['license_url'])
                     utils.log("Using MPEG DASH stream...")
-    
     return program
+
 
 def get_live():
     post_code = addon.getSetting('post_code')
@@ -294,15 +311,15 @@ def get_live():
     url = config.live_url.format(post_code)
     data = fetch_url(url)
     json_data = json.loads(data)
-    if json_data['channels']['result'][0]['valid_postcode'] == False:
+    if json_data['channels']['result'][0]['valid_postcode'] is False:
         utils.log('Invalid Post Code')
-        xbmcgui.Dialog().ok('Invalid Post Code', 
+        xbmcgui.Dialog().ok('Invalid Post Code',
                             'Please enter a valid post code and try again')
         addon.openSettings()
         return
-        
+
     channel_list = []
-    
+
     for channel in json_data['channels']['result'][0]['asset']:
         c = classes.Program()
         c.thumbnail = channel['thumbnails']['large'].get('url')
@@ -310,16 +327,19 @@ def get_live():
         c.description = channel['tvapiData']['schedule'][0].get('title')
         c.id = channel.get('thread_id')
         channel_list.append(c)
-        
+
     return channel_list
 
+
 def get_m3u8(video_id):
-    brightcove_url = 'http://c.brightcove.com/services/mobile/streaming/index/master.m3u8?videoId=%s' % video_id
+    brightcove_url = config.BRIGHTCOVE_M3U8_URL.format(video_id)
     utils.log("Loading Brightcove playlist: %s" % brightcove_url)
     index_m3u8 = m3u8.load(brightcove_url)
 
     # Get the highest bitrate video
-    rendition_uri = sorted(index_m3u8.playlists, key=lambda playlist: playlist.stream_info.bandwidth)[0].uri
+    rendition_uri = sorted(
+        index_m3u8.playlists,
+        key=lambda playlist: playlist.stream_info.bandwidth)[0].uri
 
     # Download the rendition and modify the key uris
     (rendition_m3u8_path, keys) = download_rendition(rendition_uri, video_id)
@@ -331,7 +351,8 @@ def get_m3u8(video_id):
 
 
 def get_temp_dir(video_id):
-    topdir = os.path.join(xbmc.translatePath('special://temp/'), config.ADDON_ID)
+    topdir = os.path.join(xbmc.translatePath('special://temp/'),
+                          config.ADDON_ID)
     if not os.path.isdir(topdir):
         os.mkdir(topdir)
 
@@ -344,7 +365,8 @@ def get_temp_dir(video_id):
 
 def download_rendition(rendition_uri, video_id):
     temp_dir = get_temp_dir(video_id)
-    utils.log('Downloading rendition file from "%s" to "%s"...' % (rendition_uri, temp_dir))
+    utils.log('Downloading rendition file from "{0}" to "{1}"...'.format(
+        rendition_uri, temp_dir))
     rendition_m3u8_path = os.path.join(temp_dir, 'rendition.m3u8')
     rendition_m3u8_file = open(rendition_m3u8_path, 'w')
     rendition_m3u8_response = urllib.urlopen(rendition_uri)
@@ -353,16 +375,20 @@ def download_rendition(rendition_uri, video_id):
         match = re.match('#EXT-X-KEY:METHOD=AES-128,URI="(https://.+?)"', line)
         if match:
             key_url = match.group(1)
-            key_path = os.path.join(temp_dir, "keyfile_%s.key" % md5(key_url).hexdigest()).replace('\\', '\\\\')
+            key_hash = "keyfile_%s.key" % md5(key_url).hexdigest()
+            key_path = os.path.join(temp_dir, key_hash).replace('\\', '\\\\')
             keys.append((key_path, key_url))
-            rendition_m3u8_file.write('#EXT-X-KEY:METHOD=AES-128,URI="%s"\n' % key_path)
+            rendition_m3u8_file.write(
+                '#EXT-X-KEY:METHOD=AES-128,URI="%s"\n' % key_path)
         else:
             rendition_m3u8_file.write(line)
     rendition_m3u8_file.close()
     return (rendition_m3u8_path, keys)
 
+
 def download_key(key_path, key_url):
     urllib.urlretrieve(key_url, key_path)
+
 
 def download_keys(keys):
     utils.log('Downloading HLS key files...')

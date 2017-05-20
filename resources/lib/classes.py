@@ -18,10 +18,6 @@
 #
 
 import datetime
-import re
-import time
-import urllib
-
 import utils
 
 
@@ -46,12 +42,6 @@ class Series(object):
         sort_title = self.title.lower()
         sort_title = sort_title.replace('the ', '')
         return sort_title
-
-    def get_title(self):
-        """ Return the program title, including the Series X part
-            on the end.
-        """
-        return utils.descape(self.title)
 
     def get_list_title(self):
         """ Return the program title with the number of episodes
@@ -105,7 +95,7 @@ class Program(object):
             return utils.descape(self.title)
 
     def get_episode_title(self):
-        """ Return a string of the shorttitle entry, unless its    not 
+        """ Return a string of the shorttitle entry, unless it's not
             available, then we'll just use the program title instead.
         """
         if self.episode_title:
@@ -114,11 +104,13 @@ class Program(object):
     def get_list_title(self):
         """ Return a string of the title, nicely formatted for XBMC list
         """
-        title = self.get_title() 
-    
+        title = self.get_title()
+
         if (self.get_season() and self.get_episode()):
             # Series and episode information
-            title = "%s (S%02dE%02d)" % (title, self.get_season(), self.get_episode())
+            title = "%s (S%02dE%02d)" % (title,
+                                         self.get_season(),
+                                         self.get_episode())
         else:
             if self.get_episode():
                 # Only episode information
@@ -211,7 +203,7 @@ class Program(object):
         """
         if self.thumbnail:
             return utils.descape(self.thumbnail)
-            
+
     def get_url(self):
         """ Returns the URL for the video stream
         """
@@ -223,20 +215,34 @@ class Program(object):
             XBMC requires for video metadata.
         """
         d = {}
-        if self.get_title():         d['tvshowtitle'] = self.get_title()
-        if self.get_episode_title(): d['title'] = self.get_episode_title()
-        if self.get_category():      d['genre'] = self.get_category()
-        if self.get_description():   d['plot'] = self.get_description()
-        if self.get_description():   d['plotoutline'] = self.get_description()
-        if self.get_duration():      d['duration'] = self.get_duration()
-        if self.get_year():          d['year'] = self.get_year()
-        if self.get_date():          d['aired'] = self.get_date()
-        if self.get_season():        d['season'] = self.get_season()
-        if self.get_episode():       d['episode'] = self.get_episode()
-        if self.get_rating():        d['mpaa'] = self.get_rating()
-        if self.get_url():           d['url'] = self.get_url()
-        if self.drm_key:             d['drm_key'] = self.drm_key
-        if self.genre:               d['genre'] = self.genre
+        if self.get_title():
+            d['tvshowtitle'] = self.get_title()
+        if self.get_episode_title():
+            d['title'] = self.get_episode_title()
+        if self.get_category():
+            d['genre'] = self.get_category()
+        if self.get_description():
+            d['plot'] = self.get_description()
+        if self.get_description():
+            d['plotoutline'] = self.get_description()
+        if self.get_duration():
+            d['duration'] = self.get_duration()
+        if self.get_year():
+            d['year'] = self.get_year()
+        if self.get_date():
+            d['aired'] = self.get_date()
+        if self.get_season():
+            d['season'] = self.get_season()
+        if self.get_episode():
+            d['episode'] = self.get_episode()
+        if self.get_rating():
+            d['mpaa'] = self.get_rating()
+        if self.get_url():
+            d['url'] = self.get_url()
+        if self.drm_key:
+            d['drm_key'] = self.drm_key
+        if self.genre:
+            d['genre'] = self.genre
         return d
 
     def get_xbmc_audio_stream_info(self):
@@ -244,7 +250,7 @@ class Program(object):
         """
         d = {}
         # This information may be incorrect
-        d['codec']    = 'aac'
+        d['codec'] = 'aac'
         d['language'] = 'en'
         d['channels'] = 2
         return d
@@ -253,7 +259,7 @@ class Program(object):
         """ Return a video stream info dict
         """
         d = {}
-        d['codec']  = 'h264'
-        if self.get_duration(): 
+        d['codec'] = 'h264'
+        if self.get_duration():
             d['duration'] = self.get_duration()
         return d

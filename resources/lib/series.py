@@ -20,7 +20,6 @@
 import sys
 import xbmcgui
 import xbmcplugin
-
 import comm
 import utils
 
@@ -29,7 +28,7 @@ def make_series_list(url):
     utils.log('Showing series list')
     try:
         params = utils.get_url(url)
-        series_list = comm.get_index()            
+        series_list = comm.get_index()
         series_list.sort()
 
         ok = True
@@ -45,12 +44,17 @@ def make_series_list(url):
             # Thumbnail that doesn't exist breaks XBMC 12
             listitem = xbmcgui.ListItem(s.get_title())
             if thumbnail:
-                listitem = xbmcgui.ListItem(s.get_title(), iconImage=thumbnail, thumbnailImage=thumbnail)
+                listitem = xbmcgui.ListItem(s.get_title(),
+                                            iconImage=thumbnail,
+                                            thumbnailImage=thumbnail)
 
-            listitem.setInfo('video', { 'plot' : s.get_description() })
+            listitem.setInfo('video', {'plot': s.get_description()})
 
             # add the item to the media list
-            ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=True)
+            ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),
+                                             url=url,
+                                             listitem=listitem,
+                                             isFolder=True)
 
         xbmcplugin.endOfDirectory(handle=int(sys.argv[1]), succeeded=ok)
         xbmcplugin.setContent(handle=int(sys.argv[1]), content='tvshows')

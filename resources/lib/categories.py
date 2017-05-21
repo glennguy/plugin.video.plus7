@@ -20,9 +20,9 @@
 import sys
 import xbmcgui
 import xbmcplugin
-
 import comm
 import utils
+
 
 def make_categories_list():
     utils.log('Showing category list')
@@ -35,8 +35,11 @@ def make_categories_list():
         for category in categories_list:
             url = '{0}?category={1}'.format(sys.argv[0], category)
             listitem = xbmcgui.ListItem(label=category)
-        
-            ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=listitem, isFolder=True)
+
+            ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),
+                                             url=url,
+                                             listitem=listitem,
+                                             isFolder=True)
 
         xbmcplugin.endOfDirectory(handle=int(sys.argv[1]), succeeded=ok)
         xbmcplugin.setContent(handle=int(sys.argv[1]), content='tvshows')

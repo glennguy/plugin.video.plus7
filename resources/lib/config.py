@@ -16,6 +16,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this plugin. If not, see <http://www.gnu.org/licenses/>.
 #
+# flake8: noqa
 
 import os
 import version
@@ -29,6 +30,7 @@ ISSUE_API_URL = GITHUB_API_URL + '/issues'
 ISSUE_API_AUTH = 'eGJtY2JvdDo1OTQxNTJjMTBhZGFiNGRlN2M0YWZkZDYwZGQ5NDFkNWY4YmIzOGFj'
 GIST_API_URL = 'https://api.github.com/gists'
 
+BRIGHTCOVE_M3U8_URL = 'http://c.brightcove.com/services/mobile/streaming/index/master.m3u8?videoId={0}'
 BRIGHTCOVE_URL = 'https://edge.api.brightcove.com/playback/v1/accounts/{0}/videos/ref:{1}'
 BRIGHTCOVE_KEY = 'BCpkADawqM23Rsu_vHPRKbrIicm3fvl2i33Q_d5KoWIQ1hAlTrmpbAbKyZWXQiZ_kbgJZ7DulFHPCscZmi-4Z_OsylPgPi3h8pnYWRwbKrstrrJt08gS8vYGG8aTRA87y6VhscthRz2ZUDTh'
 BRIGHTCOVE_LIVE_KEY = 'BCpkADawqM3Ty0dStHsYNCVbgBXlEbdnC6vZah6As39gvutM2aTiYRIV5ZyJH4WTWRedIYgjbdrC7Hk6Mvdx3nddTtTCcJzP-KXbkprsB0PWpdx7NQyTfdU-RfWkfg_ymolet0kzHBf8taPO'

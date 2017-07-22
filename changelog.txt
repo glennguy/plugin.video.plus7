@@ -1,4 +1,5 @@
-[B]Version 3.1.1-25-g4b7864f[/B]
+[B]Version 3.1.1-26-g71d9f99[/B]
+- Update utils for flake8 compatibility, remove version file
 - Add new higher resolution icon
 - Version 3.2.0
 - Add Travis CI config

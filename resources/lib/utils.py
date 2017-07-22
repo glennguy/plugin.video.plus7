@@ -17,23 +17,27 @@
 #   along with this plugin. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import config
+import htmlentitydefs
+import issue_reporter
 import os
 import re
 import sys
+import textwrap
 import traceback
-
-import htmlentitydefs
 import unicodedata
 import urllib
-import textwrap
-
 import xbmc
+import xbmcaddon
 import xbmcgui
 
-import config
-import issue_reporter
 
 pattern = re.compile("&(\w+?);")
+
+
+def get_version():
+    addon = xbmcaddon.Addon()
+    return addon.getAddonInfo('version')
 
 
 def descape_entity(m, defs=htmlentitydefs.entitydefs):
@@ -47,7 +51,6 @@ def descape_entity(m, defs=htmlentitydefs.entitydefs):
 def descape(string):
     # Fix the hack back from parsing with BeautifulSoup
     string = string.replace('&#38;', '&amp;')
-
     return pattern.sub(descape_entity, string)
 
 
@@ -84,7 +87,7 @@ def ensure_ascii(s):
 
 
 def log(s):
-    xbmc.log("[%s v%s] %s" % (config.NAME, config.VERSION, ensure_ascii(s)),
+    xbmc.log("[%s v%s] %s" % (config.NAME, get_version(), ensure_ascii(s)),
              level=xbmc.LOGNOTICE)
 
 
@@ -93,7 +96,7 @@ def log_error(message=None):
     if message:
         exc_value = message
     xbmc.log("[%s v%s] ERROR: %s (%d) - %s" %
-             (config.NAME, config.VERSION,
+             (config.NAME, get_version(),
               exc_traceback.tb_frame.f_code.co_name, exc_traceback.tb_lineno,
               exc_value), level=xbmc.LOGERROR)
     xbmc.log(traceback.print_exc(), level=xbmc.LOGERROR)
@@ -104,7 +107,7 @@ def dialog_error(err=None):
     msg = ''
     content = []
     exc_type, exc_value, exc_traceback = sys.exc_info()
-    content.append("%s v%s Error" % (config.NAME, config.VERSION))
+    content.append("%s v%s Error" % (config.NAME, get_version()))
     content.append(str(exc_value))
     if err:
         msg = " - %s" % err
@@ -116,7 +119,7 @@ def dialog_error(err=None):
 
 def dialog_message(msg, title=None):
     if not title:
-        title = "%s v%s" % (config.NAME, config.VERSION)
+        title = "%s v%s" % (config.NAME, get_version())
     # Add title to the first pos of the textwrap list
     content = textwrap.wrap(msg, 60)
     content.insert(0, title)
@@ -124,10 +127,12 @@ def dialog_message(msg, title=None):
 
 
 def get_platform():
-    """ Work through a list of possible platform types and return the first
-        match. Ordering of items is important as some match more than one type.
+    """Get platform
 
-        E.g. Android will match both Android and Linux
+    Work through a list of possible platform types and return the first
+    match. Ordering of items is important as some match more than one type.
+
+    E.g. Android will match both Android and Linux
     """
     platforms = [
         "Android",
@@ -159,16 +164,17 @@ def get_xbmc_version():
 
 
 def log_xbmc_platform_version():
-    """ Log our XBMC version and platform for debugging
-    """
+    """Log our XBMC version and platform for debugging"""
     version = get_xbmc_version()
     platform = get_platform()
     log("XBMC %s running on %s" % (version, platform))
 
 
 def get_file_dir():
-    """ Make our addon working directory if it doesn't exist and
-        return it.
+    """Get our file dir
+
+    Make our addon working directory if it doesn't exist and
+    return it.
     """
     filedir = os.path.join(
         xbmc.translatePath('special://temp/'), config.ADDON_ID)
@@ -178,20 +184,21 @@ def get_file_dir():
 
 
 def save_last_error_report(trace):
-    """ Save a copy of our last error report
-    """
+    """Save a copy of our last error report"""
     try:
         rfile = os.path.join(get_file_dir(), 'last_report_error.txt')
         with open(rfile, 'w') as f:
             f.write(trace)
-    except:
+    except Exception:
         log("Error writing error report file")
 
 
 def can_send_error(trace):
-    """ Check to see if our new error message is different from the last
-        successful error report. If it is, or the file doesn't exist, then
-        we'll return True
+    """Test if we are allowed to send error
+
+    Check to see if our new error message is different from the last
+    successful error report. If it is, or the file doesn't exist, then
+    we'll return True
     """
     try:
         rfile = os.path.join(get_file_dir(), 'last_report_error.txt')
@@ -203,56 +210,63 @@ def can_send_error(trace):
             report = f.read()
             if report != trace:
                 return True
-    except:
+    except Exception:
         log("Error checking error report file")
 
     log("Not allowing error report. Last report matches this one")
     return False
 
 
-def handle_error(err=None):
+def handle_error(msg, exc=None):
     traceback_str = traceback.format_exc()
     log(traceback_str)
     report_issue = False
 
     # Don't show any dialogs when user cancels
-    if traceback_str.find('SystemExit') > 0:
+    if 'SystemExit' in traceback_str:
         return
 
     d = xbmcgui.Dialog()
     if d:
-        message = dialog_error(err)
+        message = dialog_error(msg)
 
         # Work out if we should allow an error report
         send_error = can_send_error(traceback_str)
 
         # Some transient network errors we don't want any reports about
-        if ((traceback_str.find('The read operation timed out') > 0) or
-                (traceback_str.find('IncompleteRead') > 0) or
-                (traceback_str.find('possibly unavailable') > 0) or
-                (traceback_str.find('HTTP Error 401: Unauthorized') > 0) or
-                (traceback_str.find('HTTP Error 404: Not Found') > 0)):
+        ignore_errors = ['The read operation timed out',
+                         'IncompleteRead',
+                         'getaddrinfo failed',
+                         'No address associated with hostname',
+                         'Connection reset by peer',
+                         'HTTP Error 404: Not Found']
+
+        if any(s in traceback_str for s in ignore_errors):
+            send_error = False
+
+        # Don't allow reporting for these (mostly) user or service errors
+        if type(exc).__name__ in ['iviewException', 'NonFatalException']:
             send_error = False
 
         if send_error:
             latest_version = issue_reporter.get_latest_version()
             version_string = '.'.join([str(i) for i in latest_version])
-            if not issue_reporter.is_latest_version(config.VERSION,
+            if not issue_reporter.is_latest_version(get_version(),
                                                     latest_version):
-                message.append("Your version of this add-on is outdated. "
-                               "Please try upgrading to the latest version: "
-                               "v%s" % version_string)
+                message.append('Your version of this add-on is outdated. '
+                               'Please try upgrading to the latest version: '
+                               'v%s' % version_string)
                 d.ok(*message)
                 return
 
             # Only report if we haven't done one already
             try:
-                message.append("Would you like to automatically "
-                               "report this error?")
+                message.append('Would you like to automatically '
+                               'report this error?')
                 report_issue = d.yesno(*message)
-            except:
-                message.append("If this error continues to occur, "
-                               "please report it to our issue tracker.")
+            except Exception:
+                message.append('If this error continues to occur, '
+                               'please report it to our issue tracker.')
                 d.ok(*message)
         else:
             # Just show the message
@@ -263,7 +277,7 @@ def handle_error(err=None):
         if issue_url:
             # Split the url here to make sure it fits in our dialog
             split_url = issue_url.replace('/xbmc', ' /xbmc')
-            d.ok("%s v%s Error" % (config.NAME, config.VERSION),
-                 "Thanks! Your issue has been reported to: %s" % split_url)
+            d.ok('%s v%s Error' % (config.NAME, get_version()),
+                 'Thanks! Your issue has been reported to: %s' % split_url)
             # Touch our file to prevent more than one error report
             save_last_error_report(traceback_str)

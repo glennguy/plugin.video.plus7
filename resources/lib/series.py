@@ -17,11 +17,12 @@
 #   along with this plugin. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import comm
 import sys
 import xbmcgui
 import xbmcplugin
-import comm
-import utils
+
+from aussieaddonscommon import utils
 
 
 def make_series_list(url):

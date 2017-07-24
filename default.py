@@ -19,7 +19,13 @@
 
 import os
 import sys
-import drmhelper
+
+from aussieaddonscommon import utils
+
+try:
+    import drmhelper
+except ImportError:
+    drmhelper = None
 
 # Add our resources/lib to the python path
 try:
@@ -30,7 +36,6 @@ except:
 pypath = os.path.join(current_dir, 'resources', 'lib')
 sys.path.append(pypath)
 
-import utils  # noqa: E402
 import categories  # noqa: E402
 import series  # noqa: E402
 import programs  # noqa: E402
@@ -58,6 +63,8 @@ if __name__ == "__main__":
             play.play(params_str)
         elif 'action' in params:
             if params['action'] == 'reinstall_widevine_cdm':
-                drmhelper.get_widevinecdm()
+                if drmhelper:
+                    drmhelper.get_widevinecdm()
             elif params['action'] == 'reinstall_ssd_wv':
-                drmhelper.get_ssd_wv()
+                if drmhelper:
+                    drmhelper.get_ssd_wv()

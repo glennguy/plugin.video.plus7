@@ -17,15 +17,16 @@
 #   along with this plugin. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import sys
-import utils
 import comm
 import config
+import sys
+import xbmcaddon
 import xbmcgui
 import xbmcplugin
-import xbmcaddon
 
-addon = xbmcaddon.Addon(config.ADDON_ID)
+from aussieaddonscommon import utils
+
+ADDON = xbmcaddon.Addon()
 
 
 def make_live_list(url):
@@ -35,7 +36,7 @@ def make_live_list(url):
             return
 
         utils.log('Showing live channel list for postcode {0}'.format(
-                                        addon.getSetting('post_code')))
+                                        ADDON.getSetting('post_code')))
         ok = True
         for c in channels:
 

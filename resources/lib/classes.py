@@ -18,7 +18,8 @@
 #
 
 import datetime
-import utils
+
+from aussieaddonscommon import utils
 
 
 class Series(object):
@@ -39,7 +40,7 @@ class Series(object):
         """ Return a munged version of the title which
             forces correct sorting behaviour.
         """
-        sort_title = self.title.lower()
+        sort_title = self.get_title().lower()
         sort_title = sort_title.replace('the ', '')
         return sort_title
 
@@ -146,14 +147,18 @@ class Program(object):
             return utils.descape(self.rating)
 
     def get_duration(self):
-        """ Return the duration of the program in minutes
+        """ Return the duration
         """
-        if self.duration > 0:
-            # Really short shows round up to 1 min
-            if self.duration < 60:
-                return 1
+        if self.duration:
+            version = utils.get_xbmc_major_version()
+            seconds = int(self.duration)
+            if version >= 15:
+                # Kodi v15 uses seconds
+                return seconds
             else:
-                return self.duration/60
+                # Older versions use minutes
+                minutes = seconds / 60
+                return minutes
 
     def get_duration_string(self):
         """ Return a string representing the duration of the program.

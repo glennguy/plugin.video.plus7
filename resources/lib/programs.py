@@ -17,11 +17,12 @@
 #   along with this plugin. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import sys
-import utils
 import comm
+import sys
 import xbmcgui
 import xbmcplugin
+
+from aussieaddonscommon import utils
 
 
 def make_programs_list(url):
@@ -37,9 +38,9 @@ def make_programs_list(url):
 
             # Don't show any 'promo' shows,
             # they don't get returned by Brightcove
-            if p.duration and p.duration < 1000:
-                utils.log("Skipping program {0} (duration <19 mins)".format(
-                    p.get_list_title()))
+            if p.duration and p.duration < (5*60):
+                utils.log("Skipping program {0} (duration {1} <5 mins)".format(
+                    p.duration/60, p.get_list_title()))
                 num_programs -= 1
                 continue
 

@@ -1,36 +1,19 @@
-#
-#   Plus7 XBMC Plugin
-#   Copyright (C) 2014 Andy Botting
-#
-#
-#   This plugin is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation, either version 3 of the License, or
-#   (at your option) any later version.
-#
-#   This plugin is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this plugin. If not, see <http://www.gnu.org/licenses/>.
-#
-
-import sys
+import config
+import comm
 import os
+import sys
 import urllib2
-
 import xbmc
-import xbmcgui
 import xbmcaddon
+import xbmcgui
 import xbmcplugin
 
-import utils
-import comm
-from pycaption import WebVTTReader, SRTWriter
+from aussieaddonscommon import utils
 
-addon = xbmcaddon.Addon()
+from pycaption import SRTWriter
+from pycaption import WebVTTReader
+
+ADDON = xbmcaddon.Addon()
 
 
 def play(url):
@@ -49,7 +32,16 @@ def play(url):
             listitem.addStreamInfo('video', p.get_xbmc_video_stream_info())
 
         if p.drm_key:
-            import drmhelper
+            try:
+                import drmhelper
+            except ImportError:
+                utils.log("Failed to import drmhelper")
+                utils.dialog_message('This program is encrypted with DRM and '
+                                     'DRM Helper not installed. For more '
+                                     'information, please visit: '
+                                     'http://aussieaddons.com/drm')
+                return
+
             if drmhelper.check_inputstream():
                 listitem.setProperty('inputstreamaddon',
                                      'inputstream.adaptive')
@@ -70,10 +62,10 @@ def play(url):
         player = xbmc.Player()
 
         # Pull subtitles if available
-        if addon.getSetting('subtitles_enabled') == 'true':
+        if ADDON.getSetting('subtitles_enabled') == 'true':
             if p.subtitle:
                 utils.log("Enabling subtitles: %s" % p.subtitle)
-                profile = addon.getAddonInfo('profile')
+                profile = ADDON.getAddonInfo('profile')
                 subfilename = xbmc.translatePath(os.path.join(profile,
                                                               'subtitle.srt'))
                 profiledir = xbmc.translatePath(os.path.join(profile))
@@ -99,12 +91,12 @@ def play(url):
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem=listitem)
 
         # Enable subtitles for XBMC v13
-        if addon.getSetting('subtitles_enabled') == "true":
+        if ADDON.getSetting('subtitles_enabled') == "true":
             if p.subtitle:
                 if not hasattr(listitem, 'setSubtitles'):
                     while not player.isPlaying():
                         xbmc.sleep(100)  # wait until video is being played
                         player.setSubtitles(subfilename)
 
-    except:
+    except Exception:
         utils.handle_error("Unable to play video")

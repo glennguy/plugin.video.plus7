@@ -19,11 +19,6 @@
 # flake8: noqa
 
 import os
-import version
-
-NAME = 'Plus7'
-ADDON_ID = 'plugin.video.plus7'
-VERSION = version.VERSION
 
 GITHUB_API_URL = 'https://api.github.com/repos/andybotting/xbmc-addon-plus7'
 ISSUE_API_URL = GITHUB_API_URL + '/issues'

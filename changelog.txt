@@ -1,4 +1,5 @@
-[B]Version 3.1.1-26-g71d9f99[/B]
+[B]Version 3.1.1-27-g0df08a1[/B]
+- Update README
 - Update utils for flake8 compatibility, remove version file
 - Add new higher resolution icon
 - Version 3.2.0

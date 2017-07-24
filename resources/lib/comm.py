@@ -15,10 +15,13 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this plugin. If not, see <http://www.gnu.org/licenses/>.
 #
-
-import os
+import classes
+import config
 import datetime
 import json
+import m3u8
+import oauth2
+import os
 import re
 import threading
 import time
@@ -27,50 +30,50 @@ import urllib2
 import xbmc
 import xbmcaddon
 import xbmcgui
-import config
-import utils
-import classes
-import m3u8
-import oauth2 as oauth
+
+from aussieaddonscommon import session
+from aussieaddonscommon import utils
+
 from hashlib import md5
 
-addon = xbmcaddon.Addon(config.ADDON_ID)
+ADDON = xbmcaddon.Addon()
 
-
-def fetch_url(url, headers={}):
-    """
-        Simple function that fetches a URL using urllib2.
-        An exception is raised if an error (e.g. 404) occurs.
-    """
-    utils.log("Fetching URL: %s" % url)
-    http = urllib2.urlopen(urllib2.Request(url, None, headers=headers))
-    return http.read()
+def fetch_url(url, headers=None):
+    """Simple function that fetches a URL using requests."""
+    with session.Session() as sess:
+        if headers:
+            sess.headers.update(headers)
+        request = sess.get(url)
+        try:
+            request.raise_for_status()
+        except Exception as e:
+            # Just re-raise for now
+            raise e
+        data = request.text
+    return data
 
 
 def api_query(query):
-
     params = {
         'oauth_version': '1.0',
-        'oauth_nonce': oauth.generate_nonce(),
+        'oauth_nonce': oauth2.generate_nonce(),
         'oauth_timestamp': int(time.time()),
         'format': 'json',
         'q': query
     }
 
-    consumer = oauth.Consumer(key=config.oauth_consumer_key,
+    consumer = oauth2.Consumer(key=config.oauth_consumer_key,
                               secret=config.oauth_consumer_secret)
     params['oauth_consumer_key'] = consumer.key
-    req = oauth.Request(method="GET", url=config.api_url, parameters=params)
-    signature_method = oauth.SignatureMethod_HMAC_SHA1()
+    req = oauth2.Request(method="GET", url=config.api_url, parameters=params)
+    signature_method = oauth2.SignatureMethod_HMAC_SHA1()
     req.sign_request(signature_method, consumer, None)
     rs = urllib2.urlopen(req.to_url())
     return rs.read()
 
 
 def get_categories():
-    """
-        Fetch list of all shows divided by genre
-    """
+    """Fetch list of all shows divided by genre"""
     categories_list = []
     data = api_query("select * from plus7.showlist where device = 'ios'")
     json_data = json.loads(data)
@@ -86,9 +89,7 @@ def get_categories():
 
 
 def get_index():
-    """
-        Fetch the index of all shows available
-    """
+    """Fetch the index of all shows available"""
     series_list = []
     data = api_query("select * from plus7.showlist where device = 'ios'")
     json_data = json.loads(data)
@@ -117,9 +118,7 @@ def get_index():
 
 
 def get_series(series_id):
-    """
-        Fetch the episode list for a given series ID
-    """
+    """Fetch the episode list for a given series ID"""
     program_list = []
     data = api_query("select * from plus7 where key = '%s' and device = 'ios'"
                      % series_id)
@@ -185,7 +184,7 @@ def get_series(series_id):
                     if episode:
                         try:
                             p.episode = int(episode.group('episode'))
-                        except:
+                        except Exception:
                             pass  # Not a number. Move on.
 
                         # Only check for series if we've previously
@@ -195,7 +194,7 @@ def get_series(series_id):
                         if series:
                             try:
                                 p.season = int(series.group('series'))
-                            except:
+                            except Exception:
                                 pass  # Not a number. Move on.
                     else:
                         try:
@@ -204,7 +203,7 @@ def get_series(series_id):
                             timestamp = time.mktime(
                                 time.strptime(date, '%a %d %b %Y'))
                             p.date = datetime.date.fromtimestamp(timestamp)
-                        except:
+                        except Exception:
                             # Not a date or contains 'episode' - must be title
                             if sub != '':
                                 # Sometimes the actual title has a comma in it.
@@ -214,7 +213,7 @@ def get_series(series_id):
                                         p.episode_title, sub)
                                 else:
                                     p.episode_title = sub
-        except:
+        except Exception:
             utils.log('Failed to parse program: %s' % program)
 
         program_list.append(p)
@@ -223,10 +222,7 @@ def get_series(series_id):
 
 
 def get_program(program_id, live=False):
-    """
-        Fetch the program information and streaming URL for a given
-        program ID
-    """
+    """Fetch the program information and stream URL for a given program ID"""
     utils.log("Fetching program information for: %s" % program_id)
     if live:
         account = config.BRIGHTCOVE_LIVE_ACCOUNT
@@ -237,7 +233,7 @@ def get_program(program_id, live=False):
     try:
         brightcove_url = config.BRIGHTCOVE_URL.format(account, program_id)
         data = fetch_url(brightcove_url, {'BCOV-POLICY': key})
-    except:
+    except Exception:
         raise Exception("Error fetching program information, "
                         "possibly unavailable.")
 
@@ -248,7 +244,7 @@ def get_program(program_id, live=False):
 
     try:
         program_data = json.loads(data)
-    except:
+    except Exception:
         utils.log("Bad program data: %s" % program_data)
         raise Exception("Error decoding program information.")
 
@@ -306,7 +302,7 @@ def get_program(program_id, live=False):
 
 
 def get_live():
-    post_code = addon.getSetting('post_code')
+    post_code = ADDON.getSetting('post_code')
     utils.log(post_code)
     url = config.live_url.format(post_code)
     data = fetch_url(url)
@@ -315,7 +311,7 @@ def get_live():
         utils.log('Invalid Post Code')
         xbmcgui.Dialog().ok('Invalid Post Code',
                             'Please enter a valid post code and try again')
-        addon.openSettings()
+        ADDON.openSettings()
         return
 
     channel_list = []

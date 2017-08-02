@@ -47,12 +47,12 @@ def make_programs_list(url):
             listitem = xbmcgui.ListItem(label=p.get_list_title(),
                                         iconImage=p.get_thumbnail(),
                                         thumbnailImage=p.get_thumbnail())
-            listitem.setInfo('video', p.get_xbmc_list_item())
+            listitem.setInfo('video', p.get_kodi_list_item())
             listitem.setProperty('IsPlayable', 'true')
 
             if hasattr(listitem, 'addStreamInfo'):
-                listitem.addStreamInfo('audio', p.get_xbmc_audio_stream_info())
-                listitem.addStreamInfo('video', p.get_xbmc_video_stream_info())
+                listitem.addStreamInfo('audio', p.get_kodi_audio_stream_info())
+                listitem.addStreamInfo('video', p.get_kodi_video_stream_info())
 
             # Build the URL for the program, including the list_info
             url = "%s?program_id=%s" % (sys.argv[0], p.id)
@@ -66,5 +66,5 @@ def make_programs_list(url):
 
         xbmcplugin.endOfDirectory(handle=int(sys.argv[1]), succeeded=ok)
         xbmcplugin.setContent(handle=int(sys.argv[1]), content='episodes')
-    except:
+    except Exception:
         utils.handle_error("Unable to fetch program listing")

@@ -37,22 +37,28 @@ class Series(object):
         return cmp(self.get_sort_title(), other.get_sort_title())
 
     def get_sort_title(self):
-        """ Return a munged version of the title which
-            forces correct sorting behaviour.
+        """Get sort title
+
+        Return a munged version of the title which
+        forces correct sorting behaviour.
         """
         sort_title = self.get_title().lower()
         sort_title = sort_title.replace('the ', '')
         return sort_title
 
     def get_list_title(self):
-        """ Return the program title with the number of episodes
-            together for the XBMC list
+        """Get list title
+
+        Return the program title with the number of episodes
+        together for the Kodi list
         """
         return "%s (%d)" % (self.get_title(), self.get_num_episodes())
 
     def get_title(self):
-        """ Return the program title, including the Series X part
-            on the end.
+        """Get title
+
+        Return the program title, including the Series X part
+        on the end.
         """
         return utils.descape(self.title)
 
@@ -89,22 +95,25 @@ class Program(object):
         return cmp(self.title, other.title)
 
     def get_title(self):
-        """ Return the program title, including the Series X part
-            on the end.
+        """Get title
+
+        Return the program title, including the Series X part
+        on the end.
         """
         if self.title:
             return utils.descape(self.title)
 
     def get_episode_title(self):
-        """ Return a string of the shorttitle entry, unless it's not
-            available, then we'll just use the program title instead.
+        """Get episode title
+
+        Return a string of the shorttitle entry, unless it's not
+        available, then we'll just use the program title instead.
         """
         if self.episode_title:
             return utils.descape(self.episode_title)
 
     def get_list_title(self):
-        """ Return a string of the title, nicely formatted for XBMC list
-        """
+        """Return a string nicely formatted for Kodi list"""
         title = self.get_title()
 
         if (self.get_season() and self.get_episode()):
@@ -128,29 +137,28 @@ class Program(object):
         return title
 
     def get_description(self):
-        """ Return a string the program description, after running it through
-            the descape.
+        """Get description
+
+        Return a string the program description, after running it through
+        the descape.
         """
         if self.description:
             return utils.descape(self.description)
 
     def get_category(self):
-        """ Return a string of the category. E.g. Comedy
-        """
+        """Return a string of the category. E.g. Comedy"""
         if self.category:
             return utils.descape(self.category)
 
     def get_rating(self):
-        """ Return a string of the rating. E.g. PG, MA
-        """
+        """Return a string of the rating. E.g. PG, MA"""
         if self.rating:
             return utils.descape(self.rating)
 
     def get_duration(self):
-        """ Return the duration
-        """
+        """Return the duration"""
         if self.duration:
-            version = utils.get_xbmc_major_version()
+            version = utils.get_kodi_major_version()
             seconds = int(self.duration)
             if version >= 15:
                 # Kodi v15 uses seconds
@@ -161,8 +169,10 @@ class Program(object):
                 return minutes
 
     def get_duration_string(self):
-        """ Return a string representing the duration of the program.
-            E.g. 00:30 (30 minutes) from a given string of seconds
+        """Get duration string
+
+        Return a string representing the duration of the program.
+        E.g. 00:30 (30 minutes) from a given string of seconds
         """
         if self.duration > 0:
             sec = self.duration
@@ -173,14 +183,18 @@ class Program(object):
             return "%s:%s" % (hrs, mins)
 
     def get_date(self):
-        """ Return a string of the date in the format 2010-02-28
-            which is useful for XBMC labels.
+        """Get date
+
+        Return a string of the date in the format 2010-02-28
+        which is useful for XBMC labels.
         """
         if self.date:
             return self.date.strftime("%Y-%m-%d")
 
     def get_year(self):
-        """ Return an integer of the year of publish date
+        """Get year
+
+        Return an integer of the year of publish date
         """
         if self.date:
             return self.date.year
@@ -188,36 +202,40 @@ class Program(object):
             return datetime.datetime.now().year
 
     def get_season(self):
-        """ Return an integer of the Series, discovered by a regular
-            expression from the orginal title, unless its not available,
-            then the year will be returned.
+        """Get season
+
+        Return an integer of the Series, discovered by a regular
+        expression from the orginal title, unless its not available,
+        then the year will be returned.
         """
         if self.season:
             return self.season
 
     def get_episode(self):
-        """ Return an integer of the Episode, discovered by a regular
-            expression from the orginal title, unless its not available,
-            then a 0 will be returned.
+        """Get episode
+
+        Return an integer of the Episode, discovered by a regular
+        expression from the orginal title, unless its not available,
+        then a 0 will be returned.
         """
         if self.episode:
             return self.episode
 
     def get_thumbnail(self):
-        """ Returns the thumbnail
-        """
+        """Returns the thumbnail"""
         if self.thumbnail:
             return utils.descape(self.thumbnail)
 
     def get_url(self):
-        """ Returns the URL for the video stream
-        """
+        """Returns the URL for the video stream"""
         if self.url:
             return self.url
 
-    def get_xbmc_list_item(self):
-        """ Returns a dict of program information, in the format which
-            XBMC requires for video metadata.
+    def get_kodi_list_item(self):
+        """Get XBMC list item
+
+        Returns a dict of program information, in the format which
+        Kodi requires for video metadata.
         """
         d = {}
         if self.get_title():
@@ -250,9 +268,8 @@ class Program(object):
             d['genre'] = self.genre
         return d
 
-    def get_xbmc_audio_stream_info(self):
-        """ Return an audio stream info dict
-        """
+    def get_kodi_audio_stream_info(self):
+        """Return an audio stream info dict"""
         d = {}
         # This information may be incorrect
         d['codec'] = 'aac'
@@ -260,9 +277,8 @@ class Program(object):
         d['channels'] = 2
         return d
 
-    def get_xbmc_video_stream_info(self):
-        """ Return a video stream info dict
-        """
+    def get_kodi_video_stream_info(self):
+        """Return a video stream info dict"""
         d = {}
         d['codec'] = 'h264'
         if self.get_duration():

@@ -19,6 +19,7 @@
 
 import os
 import sys
+import xbmcaddon
 
 from aussieaddonscommon import utils
 
@@ -28,13 +29,8 @@ except ImportError:
     drmhelper = None
 
 # Add our resources/lib to the python path
-try:
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-except:
-    current_dir = os.getcwd()
-
-pypath = os.path.join(current_dir, 'resources', 'lib')
-sys.path.append(pypath)
+addon_dir = xbmcaddon.Addon().getAddonInfo('path')
+sys.path.insert(0, os.path.join(addon_dir, 'resources', 'lib'))
 
 import categories  # noqa: E402
 import series  # noqa: E402
@@ -43,28 +39,29 @@ import play  # noqa: E402
 import live  # noqa: E402
 
 # Print our platform/version debugging information
-utils.log_xbmc_platform_version()
+utils.log_kodi_platform_version()
 
 if __name__ == "__main__":
     params_str = sys.argv[2]
     params = utils.get_url(params_str)
 
-    if (len(params) == 0):
+    if len(params) == 0:
         categories.make_categories_list()
-    else:
-        if 'category' in params:
-            if params['category'] == 'Live TV':
-                live.make_live_list(params_str)
-            else:
-                series.make_series_list(params_str)
-        if 'series_id' in params:
-            programs.make_programs_list(params_str)
-        elif 'program_id' in params:
-            play.play(params_str)
-        elif 'action' in params:
-            if params['action'] == 'reinstall_widevine_cdm':
-                if drmhelper:
-                    drmhelper.get_widevinecdm()
-            elif params['action'] == 'reinstall_ssd_wv':
-                if drmhelper:
-                    drmhelper.get_ssd_wv()
+    elif 'category' in params:
+        if params['category'] == 'Live TV':
+            live.make_live_list(params_str)
+        else:
+            series.make_series_list(params_str)
+    elif 'series_id' in params:
+        programs.make_programs_list(params_str)
+    elif 'program_id' in params:
+        play.play(params_str)
+    elif 'action' in params:
+        if params['action'] == 'sendreport':
+            utils.user_report()
+        elif params['action'] == 'reinstall_widevine_cdm':
+            if drmhelper:
+                drmhelper.get_widevinecdm()
+        elif params['action'] == 'reinstall_ssd_wv':
+            if drmhelper:
+                drmhelper.get_ssd_wv()

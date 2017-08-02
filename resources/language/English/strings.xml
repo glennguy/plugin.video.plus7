@@ -1,12 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
   <string id="10000">Plus 7</string>
+
   <!-- Categories -->
   <string id="10080">Settings</string>
-  <string id="10090">DRM debugging</string>
-  <!-- Other strings -->
+  <string id="10090">Debugging</string>
+
+  <!-- Settings -->
   <string id="10093">Enable Subtitles</string>
   <string id="10094">Postcode for live streams</string>
-  <string id="10095">Reinstall ssd_wv module</string>
-  <string id="10096">Reinstall widevine_cdm module</string>
+
+  <!-- Debugging -->
+  <string id="10095">Reinstall DRM ssd_wv module</string>
+  <string id="10096">Reinstall DRM widevine_cdm module</string>
+  <string id="10097">Send error report</string>
+
 </strings>

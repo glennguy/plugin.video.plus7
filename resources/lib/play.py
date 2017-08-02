@@ -1,4 +1,3 @@
-import config
 import comm
 import os
 import sys
@@ -25,11 +24,11 @@ def play(url):
                                     iconImage=p.thumbnail,
                                     thumbnailImage=p.thumbnail,
                                     path=p.get_url())
-        listitem.setInfo('video', p.get_xbmc_list_item())
+        listitem.setInfo('video', p.get_kodi_list_item())
 
         if hasattr(listitem, 'addStreamInfo'):
-            listitem.addStreamInfo('audio', p.get_xbmc_audio_stream_info())
-            listitem.addStreamInfo('video', p.get_xbmc_video_stream_info())
+            listitem.addStreamInfo('audio', p.get_kodi_audio_stream_info())
+            listitem.addStreamInfo('video', p.get_kodi_video_stream_info())
 
         if p.drm_key:
             try:

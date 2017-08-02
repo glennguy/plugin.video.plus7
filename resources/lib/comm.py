@@ -38,6 +38,7 @@ from hashlib import md5
 
 ADDON = xbmcaddon.Addon()
 
+
 def fetch_url(url, headers=None):
     """Simple function that fetches a URL using requests."""
     with session.Session() as sess:
@@ -63,7 +64,7 @@ def api_query(query):
     }
 
     consumer = oauth2.Consumer(key=config.oauth_consumer_key,
-                              secret=config.oauth_consumer_secret)
+                               secret=config.oauth_consumer_secret)
     params['oauth_consumer_key'] = consumer.key
     req = oauth2.Request(method="GET", url=config.api_url, parameters=params)
     signature_method = oauth2.SignatureMethod_HMAC_SHA1()
@@ -303,7 +304,6 @@ def get_program(program_id, live=False):
 
 def get_live():
     post_code = ADDON.getSetting('post_code')
-    utils.log(post_code)
     url = config.live_url.format(post_code)
     data = fetch_url(url)
     json_data = json.loads(data)

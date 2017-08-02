@@ -18,7 +18,6 @@
 #
 
 import comm
-import config
 import sys
 import xbmcaddon
 import xbmcgui
@@ -43,12 +42,12 @@ def make_live_list(url):
             listitem = xbmcgui.ListItem(label=c.get_list_title(),
                                         iconImage=c.get_thumbnail(),
                                         thumbnailImage=c.get_thumbnail())
-            listitem.setInfo('video', c.get_xbmc_list_item())
+            listitem.setInfo('video', c.get_kodi_list_item())
             listitem.setProperty('IsPlayable', 'true')
 
             if hasattr(listitem, 'addStreamInfo'):
-                listitem.addStreamInfo('audio', c.get_xbmc_audio_stream_info())
-                listitem.addStreamInfo('video', c.get_xbmc_video_stream_info())
+                listitem.addStreamInfo('audio', c.get_kodi_audio_stream_info())
+                listitem.addStreamInfo('video', c.get_kodi_video_stream_info())
 
             # Build the URL for the program, including the list_info
             url = '{0}?program_id={1}&live=true'.format(sys.argv[0], c.id)
@@ -61,5 +60,5 @@ def make_live_list(url):
 
         xbmcplugin.endOfDirectory(handle=int(sys.argv[1]), succeeded=ok)
         xbmcplugin.setContent(handle=int(sys.argv[1]), content='episodes')
-    except:
+    except Exception:
         utils.handle_error("Unable to fetch live channel listing")

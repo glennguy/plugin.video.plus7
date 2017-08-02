@@ -44,5 +44,5 @@ def make_categories_list():
 
         xbmcplugin.endOfDirectory(handle=int(sys.argv[1]), succeeded=ok)
         xbmcplugin.setContent(handle=int(sys.argv[1]), content='tvshows')
-    except:
+    except Exception:
         utils.handle_error("Unable to show category listing")

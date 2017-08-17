@@ -1,4 +1,5 @@
-[B]Version 3.1.1-31-gc4d576d[/B]
+[B]Version 3.1.1-32-ga563e1b[/B]
+- Update provider name in addon.xml
 - Updates for common module, flake8 fixes, issue reporting updates
 - Update Travis CI token
 - Update metadata

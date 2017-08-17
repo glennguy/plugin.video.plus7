@@ -31,6 +31,7 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 
+from aussieaddonscommon import exceptions
 from aussieaddonscommon import session
 from aussieaddonscommon import utils
 
@@ -234,14 +235,14 @@ def get_program(program_id, live=False):
     try:
         brightcove_url = config.BRIGHTCOVE_URL.format(account, program_id)
         data = fetch_url(brightcove_url, {'BCOV-POLICY': key})
-    except Exception:
-        raise Exception("Error fetching program information, "
-                        "possibly unavailable.")
+    except Exception as e:
+        raise exceptions.AussieAddonsException("Error fetching program: %s "
+            "This will only work within Australia." % str(e))
 
     if data == 'null':
         utils.log("Brightcove returned: '%s'" % data)
-        raise Exception("Error fetching program information, "
-                        "possibly unavailable.")
+        raise exceptions.AussieAddonsException("Error fetching program. "
+            "This will only work within Australia.")
 
     try:
         program_data = json.loads(data)

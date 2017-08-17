@@ -1,4 +1,5 @@
-[B]Version 3.1.1-30-gd6ed428[/B]
+[B]Version 3.1.1-31-gc4d576d[/B]
+- Updates for common module, flake8 fixes, issue reporting updates
 - Update Travis CI token
 - Update metadata
 - Use aussie add-ons common module

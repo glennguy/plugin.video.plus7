@@ -1,4 +1,6 @@
 [B]Version 3.2.0[/B]
+
+[B]Version v3.2.0[/B]
 - Prevent reports for program fetch errors (esp outside Australia)
 - Update provider name in addon.xml
 - Updates for common module, flake8 fixes, issue reporting updates
@@ -8,7 +10,6 @@
 - Update README
 - Update utils for flake8 compatibility, remove version file
 - Add new higher resolution icon
-- Version 3.2.0
 - Add Travis CI config
 - Use external drmhelper and issuereporter, flake8, live fix
 - Update README.markdown

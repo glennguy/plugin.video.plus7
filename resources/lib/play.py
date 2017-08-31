@@ -61,41 +61,32 @@ def play(url):
         player = xbmc.Player()
 
         # Pull subtitles if available
-        if ADDON.getSetting('subtitles_enabled') == 'true':
-            if p.subtitle:
-                utils.log("Enabling subtitles: %s" % p.subtitle)
-                profile = ADDON.getAddonInfo('profile')
-                subfilename = xbmc.translatePath(os.path.join(profile,
-                                                              'subtitle.srt'))
-                profiledir = xbmc.translatePath(os.path.join(profile))
-                if not os.path.isdir(profiledir):
-                    os.makedirs(profiledir)
+        if p.subtitle:
+            utils.log("Enabling subtitles: %s" % p.subtitle)
+            profile = ADDON.getAddonInfo('profile')
+            subfilename = xbmc.translatePath(os.path.join(profile,
+                                                          'subtitle.srt'))
+            profiledir = xbmc.translatePath(os.path.join(profile))
+            if not os.path.isdir(profiledir):
+                os.makedirs(profiledir)
 
-                webvtt_data = urllib2.urlopen(
-                    p.subtitle).read().decode('utf-8')
-                if webvtt_data:
-                    with open(subfilename, 'w') as f:
-                        webvtt_subtitle = WebVTTReader().read(webvtt_data)
-                        srt_subtitle = SRTWriter().write(webvtt_subtitle)
-                        srt_unicode = srt_subtitle.encode('utf-8')
-                        f.write(srt_unicode)
+            webvtt_data = urllib2.urlopen(
+                p.subtitle).read().decode('utf-8')
+            if webvtt_data:
+                with open(subfilename, 'w') as f:
+                    webvtt_subtitle = WebVTTReader().read(webvtt_data)
+                    srt_subtitle = SRTWriter().write(webvtt_subtitle)
+                    srt_unicode = srt_subtitle.encode('utf-8')
+                    f.write(srt_unicode)
 
-                if hasattr(listitem, 'setSubtitles'):
-                    # This function only supported from Kodi v14+
-                    listitem.setSubtitles([subfilename])
+            if hasattr(listitem, 'setSubtitles'):
+                # This function only supported from Kodi v14+
+                listitem.setSubtitles([subfilename])
 
         # Play video
         utils.log("Attempting to play: {0} : {1}".format(p.get_title(),
                                                          p.get_url()))
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem=listitem)
-
-        # Enable subtitles for XBMC v13
-        if ADDON.getSetting('subtitles_enabled') == "true":
-            if p.subtitle:
-                if not hasattr(listitem, 'setSubtitles'):
-                    while not player.isPlaying():
-                        xbmc.sleep(100)  # wait until video is being played
-                        player.setSubtitles(subfilename)
 
     except Exception:
         utils.handle_error("Unable to play video")

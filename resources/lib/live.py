@@ -50,7 +50,9 @@ def make_live_list(url):
                 listitem.addStreamInfo('video', c.get_kodi_video_stream_info())
 
             # Build the URL for the program, including the list_info
-            url = '{0}?program_id={1}&live=true'.format(sys.argv[0], c.id)
+            url = '{0}?program_id={1}&bcid={2}&live=true'.format(sys.argv[0],
+                                                                 c.id,
+                                                                 c.bcid)
 
             # Add the program item to the list
             ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),

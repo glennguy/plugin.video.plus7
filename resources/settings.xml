@@ -7,6 +7,7 @@
   <!-- Debugging -->
   <category label="10090">
     <setting label="10097" type="action" action="RunPlugin(plugin://plugin.video.plus7/?action=sendreport)"/>
+    <setting label="10098" type="action" action="RunPlugin(plugin://plugin.video.plus7/?action=update_ia)"/>
     <setting label="10095" type="action" action="RunPlugin(plugin://plugin.video.plus7/?action=reinstall_ssd_wv)"/>
     <setting label="10096" type="action" action="RunPlugin(plugin://plugin.video.plus7/?action=reinstall_widevine_cdm)"/>
   </category>

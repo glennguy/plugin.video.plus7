@@ -32,6 +32,7 @@ def make_categories_list():
         categories_list.sort()
         categories_list.insert(0, 'Live TV')
         categories_list.insert(0, 'All TV Shows')
+        categories_list.append('Settings')
 
         for category in categories_list:
             url = '{0}?category={1}'.format(sys.argv[0], category)

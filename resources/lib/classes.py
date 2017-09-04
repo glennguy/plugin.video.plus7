@@ -73,6 +73,7 @@ class Program(object):
 
     def __init__(self):
         self.id = None
+        self.bcid = None
         self.title = ''
         self.description = ''
         self.episode_title = None
@@ -148,7 +149,7 @@ class Program(object):
     def get_category(self):
         """Return a string of the category. E.g. Comedy"""
         if self.category:
-            return utils.descape(self.category)
+            return utils.descape(self.genre)
 
     def get_rating(self):
         """Return a string of the rating. E.g. PG, MA"""
@@ -262,10 +263,6 @@ class Program(object):
             d['mpaa'] = self.get_rating()
         if self.get_url():
             d['url'] = self.get_url()
-        if self.drm_key:
-            d['drm_key'] = self.drm_key
-        if self.genre:
-            d['genre'] = self.genre
         return d
 
     def get_kodi_audio_stream_info(self):

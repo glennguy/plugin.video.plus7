@@ -20,13 +20,12 @@
 import os
 import sys
 import xbmcaddon
+import xbmcgui
+# fix for python bug
+import _strptime  # noqa: F401
 
+import drmhelper
 from aussieaddonscommon import utils
-
-try:
-    import drmhelper
-except ImportError:
-    drmhelper = None
 
 # Add our resources/lib to the python path
 addon_dir = xbmcaddon.Addon().getAddonInfo('path')
@@ -41,6 +40,7 @@ import live  # noqa: E402
 # Print our platform/version debugging information
 utils.log_kodi_platform_version()
 
+
 if __name__ == "__main__":
     params_str = sys.argv[2]
     params = utils.get_url(params_str)
@@ -50,6 +50,8 @@ if __name__ == "__main__":
     elif 'category' in params:
         if params['category'] == 'Live TV':
             live.make_live_list(params_str)
+        elif params['category'] == 'Settings':
+            xbmcaddon.Addon().openSettings()
         else:
             series.make_series_list(params_str)
     elif 'series_id' in params:
@@ -60,8 +62,20 @@ if __name__ == "__main__":
         if params['action'] == 'sendreport':
             utils.user_report()
         elif params['action'] == 'reinstall_widevine_cdm':
-            if drmhelper:
-                drmhelper.get_widevinecdm()
+            drmhelper.get_widevinecdm()
         elif params['action'] == 'reinstall_ssd_wv':
-            if drmhelper:
-                drmhelper.get_ssd_wv()
+            drmhelper.get_ssd_wv()
+        elif params['action'] == 'update_ia':
+            addon = drmhelper.get_addon(drm=True)
+            if not drmhelper.is_ia_current(addon, latest=True):
+                if xbmcgui.Dialog().yesno(
+                    'Upgrade?', ('Newer version of inputstream.adaptive '
+                                 'available ({0}) - would you like to '
+                                 'upgrade to this version?'.format(
+                                    drmhelper.get_latest_ia_ver()))):
+                    drmhelper.get_ia_direct(update=True, drm=True)
+            else:
+                ver = addon.getAddonInfo('version')
+                utils.dialog_message('Up to date: Inputstream.adaptive '
+                                     'version {0} installed and enabled.'
+                                     ''.format(ver))

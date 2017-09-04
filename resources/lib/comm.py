@@ -140,6 +140,7 @@ def get_series(series_id):
         try:
             p = classes.Program()
             p.id = program.get('id')
+            p.bcid = program.get('bcid')
             p.title = program.get('show')
             p.description = program.get('abstract')
             p.thumbnail = program.get('image')
@@ -223,26 +224,22 @@ def get_series(series_id):
     return program_list
 
 
-def get_program(program_id, live=False):
+def get_program(program_id, bcid, live=False):
     """Fetch the program information and stream URL for a given program ID"""
     utils.log("Fetching program information for: %s" % program_id)
-    if live:
-        account = config.BRIGHTCOVE_LIVE_ACCOUNT
-        key = config.BRIGHTCOVE_LIVE_KEY
-    else:
-        account = config.BRIGHTCOVE_ACCOUNT
-        key = config.BRIGHTCOVE_KEY
+    key = config.BRIGHTCOVE_ACCOUNT[bcid]
     try:
-        brightcove_url = config.BRIGHTCOVE_URL.format(account, program_id)
+        brightcove_url = config.BRIGHTCOVE_URL.format(bcid, program_id)
         data = fetch_url(brightcove_url, {'BCOV-POLICY': key})
     except Exception as e:
-        raise exceptions.AussieAddonsException("Error fetching program: %s "
+        raise exceptions.AussieAddonsException(
+            "Error fetching program: %s "
             "This will only work within Australia." % str(e))
 
     if data == 'null':
         utils.log("Brightcove returned: '%s'" % data)
-        raise exceptions.AussieAddonsException("Error fetching program. "
-            "This will only work within Australia.")
+        raise exceptions.AussieAddonsException(
+            "Error fetching program. This will only work within Australia.")
 
     try:
         program_data = json.loads(data)
@@ -323,6 +320,7 @@ def get_live():
         c.title = channel.get('title')
         c.description = channel['tvapiData']['schedule'][0].get('title')
         c.id = channel.get('thread_id')
+        c.bcid = channel.get('brightcove_account_id')
         channel_list.append(c)
 
     return channel_list

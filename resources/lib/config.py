@@ -27,10 +27,9 @@ GIST_API_URL = 'https://api.github.com/gists'
 
 BRIGHTCOVE_M3U8_URL = 'http://c.brightcove.com/services/mobile/streaming/index/master.m3u8?videoId={0}'
 BRIGHTCOVE_URL = 'https://edge.api.brightcove.com/playback/v1/accounts/{0}/videos/ref:{1}'
-BRIGHTCOVE_KEY = 'BCpkADawqM23Rsu_vHPRKbrIicm3fvl2i33Q_d5KoWIQ1hAlTrmpbAbKyZWXQiZ_kbgJZ7DulFHPCscZmi-4Z_OsylPgPi3h8pnYWRwbKrstrrJt08gS8vYGG8aTRA87y6VhscthRz2ZUDTh'
-BRIGHTCOVE_LIVE_KEY = 'BCpkADawqM3Ty0dStHsYNCVbgBXlEbdnC6vZah6As39gvutM2aTiYRIV5ZyJH4WTWRedIYgjbdrC7Hk6Mvdx3nddTtTCcJzP-KXbkprsB0PWpdx7NQyTfdU-RfWkfg_ymolet0kzHBf8taPO'
-BRIGHTCOVE_ACCOUNT = '2376984108001'
-BRIGHTCOVE_LIVE_ACCOUNT = '4456740435001'
+BRIGHTCOVE_ACCOUNT = {'2376984108001': 'BCpkADawqM23Rsu_vHPRKbrIicm3fvl2i33Q_d5KoWIQ1hAlTrmpbAbKyZWXQiZ_kbgJZ7DulFHPCscZmi-4Z_OsylPgPi3h8pnYWRwbKrstrrJt08gS8vYGG8aTRA87y6VhscthRz2ZUDTh',
+                      '2376984109001': 'BCpkADawqM39TuhPMJu1xTBSj0v3v4zTIs9HKuYDYQlmmru1yrD5pzbFYN8OM_vu2PLXqAsUpZqgRL3hcUCUhARK1yYpo6Qt09r2p6A1xiTsiRFSLpsg7SV-aGHCuJ-a6O5k61OKwusrR2r1',
+                      '4456740435001': 'BCpkADawqM3Ty0dStHsYNCVbgBXlEbdnC6vZah6As39gvutM2aTiYRIV5ZyJH4WTWRedIYgjbdrC7Hk6Mvdx3nddTtTCcJzP-KXbkprsB0PWpdx7NQyTfdU-RfWkfg_ymolet0kzHBf8taPO'}
 api_url = 'https://y7mobile.query.yahoo.com/v1/yql'
 live_url = 'https://y7mobile.query.yahoo.com/v1/livestream/postcode/{0}'
 oauth_consumer_key = 'dj0yJmk9QWJodDF5WDVnTGhwJmQ9WVdrOU1HODNiVXB0TnpnbWNHbzlNVGc0TWpnMk5UUTJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD04Yw--'

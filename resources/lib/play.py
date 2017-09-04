@@ -18,7 +18,9 @@ ADDON = xbmcaddon.Addon()
 def play(url):
     try:
         params = utils.get_url(url)
-        p = comm.get_program(params['program_id'], 'live' in params)
+        p = comm.get_program(params['program_id'],
+                             params['bcid'],
+                             'live' in params)
 
         listitem = xbmcgui.ListItem(label=p.get_title(),
                                     iconImage=p.thumbnail,
@@ -57,8 +59,6 @@ def play(url):
                                           True,
                                           xbmcgui.ListItem(path=None))
                 return
-
-        player = xbmc.Player()
 
         # Pull subtitles if available
         if p.subtitle:

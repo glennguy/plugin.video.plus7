@@ -20,22 +20,14 @@ import config
 import datetime
 import json
 import m3u8
-import oauth2
-import os
 import re
-import threading
 import time
-import urllib
-import urllib2
-import xbmc
 import xbmcaddon
 import xbmcgui
 
 from aussieaddonscommon import exceptions
 from aussieaddonscommon import session
 from aussieaddonscommon import utils
-
-from hashlib import md5
 
 ADDON = xbmcaddon.Addon()
 
@@ -55,34 +47,34 @@ def fetch_url(url, headers=None):
     return data
 
 
-def api_query(query):
-    params = {
-        'oauth_version': '1.0',
-        'oauth_nonce': oauth2.generate_nonce(),
-        'oauth_timestamp': int(time.time()),
-        'format': 'json',
-        'q': query
-    }
-
-    consumer = oauth2.Consumer(key=config.oauth_consumer_key,
-                               secret=config.oauth_consumer_secret)
-    params['oauth_consumer_key'] = consumer.key
-    req = oauth2.Request(method="GET", url=config.api_url, parameters=params)
-    signature_method = oauth2.SignatureMethod_HMAC_SHA1()
-    req.sign_request(signature_method, consumer, None)
-    rs = urllib2.urlopen(req.to_url())
-    return rs.read()
+def api_query(key=None):
+    if key:
+        query_url = config.query_url.format(key)
+    else:
+        query_url = config.shows_url
+    # deal with intermittient api timeout errors
+    retries = 3
+    while retries > 0:
+        data = json.loads(fetch_url(query_url))
+        if 'plus7' in data:
+            key_name = 'plus7'
+        else:
+            key_name = 'plus7shows'
+        if data[key_name]['error']:
+            retries -= 1
+        else:
+            return data
+    return None
 
 
 def get_categories():
     """Fetch list of all shows divided by genre"""
     categories_list = []
-    data = api_query("select * from plus7.showlist where device = 'ios'")
-    json_data = json.loads(data)
-    genre_data = json_data['query']['results']['json']['genre']
+    json_data = api_query()
+    genre_data = json_data['plus7shows']['result'][0]['genre']
 
     for genre in genre_data.keys():
-        categories_list.append(genre.replace('_', ' '))
+        categories_list.append(genre)
     if ' ' in categories_list:
         categories_list.remove(' ')
     if 'TV Snax' in categories_list:
@@ -93,10 +85,9 @@ def get_categories():
 def get_index():
     """Fetch the index of all shows available"""
     series_list = []
-    data = api_query("select * from plus7.showlist where device = 'ios'")
-    json_data = json.loads(data)
+    json_data = api_query()
 
-    series_data = json_data['query']['results']['json']['show_data']
+    series_data = json_data['plus7shows']['result'][0]['show_data']
 
     for series in series_data:
 
@@ -122,14 +113,12 @@ def get_index():
 def get_series(series_id):
     """Fetch the episode list for a given series ID"""
     program_list = []
-    data = api_query("select * from plus7 where key = '%s' and device = 'ios'"
-                     % series_id)
-    json_data = json.loads(data)
+    json_data = api_query(series_id)
 
-    if not json_data['query']['results']:
+    if not json_data['plus7']['result']:
         return program_list
 
-    program_data = json_data['query']['results']['json']['episodes']
+    program_data = json_data['plus7']['result'][0]['episodes']
 
     # For single programs, we'll need to force the output to be
     # list of dicts.
@@ -301,6 +290,7 @@ def get_program(program_id, bcid, live=False):
 
 
 def get_live():
+    """Fetch live channel info for available channels"""
     post_code = ADDON.getSetting('post_code')
     url = config.live_url.format(post_code)
     data = fetch_url(url)
@@ -324,76 +314,3 @@ def get_live():
         channel_list.append(c)
 
     return channel_list
-
-
-def get_m3u8(video_id):
-    brightcove_url = config.BRIGHTCOVE_M3U8_URL.format(video_id)
-    utils.log("Loading Brightcove playlist: %s" % brightcove_url)
-    index_m3u8 = m3u8.load(brightcove_url)
-
-    # Get the highest bitrate video
-    rendition_uri = sorted(
-        index_m3u8.playlists,
-        key=lambda playlist: playlist.stream_info.bandwidth)[0].uri
-
-    # Download the rendition and modify the key uris
-    (rendition_m3u8_path, keys) = download_rendition(rendition_uri, video_id)
-
-    # Download the keys
-    download_keys(keys)
-
-    return rendition_m3u8_path
-
-
-def get_temp_dir(video_id):
-    topdir = os.path.join(xbmc.translatePath('special://temp/'),
-                          config.ADDON_ID)
-    if not os.path.isdir(topdir):
-        os.mkdir(topdir)
-
-    dirname = 'brightcove_%s' % video_id
-    path = os.path.join(topdir, dirname)
-    if not os.path.isdir(path):
-        os.mkdir(path)
-    return path
-
-
-def download_rendition(rendition_uri, video_id):
-    temp_dir = get_temp_dir(video_id)
-    utils.log('Downloading rendition file from "{0}" to "{1}"...'.format(
-        rendition_uri, temp_dir))
-    rendition_m3u8_path = os.path.join(temp_dir, 'rendition.m3u8')
-    rendition_m3u8_file = open(rendition_m3u8_path, 'w')
-    rendition_m3u8_response = urllib.urlopen(rendition_uri)
-    keys = []
-    for line in rendition_m3u8_response:
-        match = re.match('#EXT-X-KEY:METHOD=AES-128,URI="(https://.+?)"', line)
-        if match:
-            key_url = match.group(1)
-            key_hash = "keyfile_%s.key" % md5(key_url).hexdigest()
-            key_path = os.path.join(temp_dir, key_hash).replace('\\', '\\\\')
-            keys.append((key_path, key_url))
-            rendition_m3u8_file.write(
-                '#EXT-X-KEY:METHOD=AES-128,URI="%s"\n' % key_path)
-        else:
-            rendition_m3u8_file.write(line)
-    rendition_m3u8_file.close()
-    return (rendition_m3u8_path, keys)
-
-
-def download_key(key_path, key_url):
-    urllib.urlretrieve(key_url, key_path)
-
-
-def download_keys(keys):
-    utils.log('Downloading HLS key files...')
-
-    threads = []
-    for key in keys:
-        thread = threading.Thread(target=download_key, args=key)
-        thread.daemon = True
-        thread.start()
-        threads.append(thread)
-
-    for thread in threads:
-        thread.join()

@@ -222,13 +222,12 @@ def get_program(program_id, bcid, live=False):
         data = fetch_url(brightcove_url, {'BCOV-POLICY': key})
     except Exception as e:
         raise exceptions.AussieAddonsException(
-            "Error fetching program: %s "
-            "This will only work within Australia." % str(e))
+            "Error fetching program: %s " % str(e))
 
     if data == 'null':
         utils.log("Brightcove returned: '%s'" % data)
         raise exceptions.AussieAddonsException(
-            "Error fetching program. This will only work within Australia.")
+            "Error fetching program.")
 
     try:
         program_data = json.loads(data)

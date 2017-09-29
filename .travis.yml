@@ -6,7 +6,7 @@ install:
   - pip install GitPython
   - export TRAVIS_COMMIT_MSG="$TRAVIS_REPO_SLUG - $(git log --format=%B --no-merges -n 1)"
 script:
-  - [ "$TRAVIS_PULL_REQUEST" == "false" ] || travis_terminate 0
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then travis_terminate 0; fi
   - >
     git clone https://github.com/xbmc-catchuptv-au/repo-devel.git .deploy && 
     cd .deploy && 

@@ -104,7 +104,7 @@ def get_index():
         s.title = title
         s.description = series_data[series].get('info')
         s.thumbnail = series_data[series].get('thumbnail')
-        s.genre = list(series_data[series].get('genre').split(','))
+        s.genre = list(series_data[series].get('genre', '').split(','))
         series_list.append(s)
 
     return series_list

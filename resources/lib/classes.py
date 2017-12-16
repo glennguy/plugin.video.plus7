@@ -17,15 +17,16 @@
 #   along with this plugin. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import config
 import datetime
-import requests
-import time
 import unicodedata
 import urllib
 import uuid
+import xbmcaddon
 
 from aussieaddonscommon import utils
+
+ADDON = xbmcaddon.Addon()
+
 
 class Category(object):
     def __init__(self, **kwargs):
@@ -58,10 +59,11 @@ class Category(object):
 
     def get_thumb(self):
         if self.thumb:
-            return config.IMAGE_PROXY.format(
-                urllib.quote_plus(self.thumb), '1125')
+            return 'http://localhost:{0}/image?u={1}&w={2}&q=90'.format(
+                ADDON.getSetting('thumbmail_port'),
+                urllib.quote_plus(self.thumb),
+                '1125')
 
-    
     def make_kodi_url(self):
         d = vars(self)
         for key, value in d.iteritems():
@@ -69,6 +71,7 @@ class Category(object):
                 d[key] = unicodedata.normalize(
                     'NFKD', value).encode('ascii', 'ignore')
         return '{0}'.format(urllib.urlencode(d))
+
 
 class Series(object):
 
@@ -110,8 +113,10 @@ class Series(object):
         return utils.descape(self.title)
 
     def get_thumb(self):
-        return config.IMAGE_PROXY.format(
-            urllib.quote_plus(self.thumb), '1125')
+        return 'http://localhost:{0}/image?u={1}&w={2}&q=90'.format(
+            ADDON.getSetting('thumbmail_port'),
+            urllib.quote_plus(self.thumb),
+            '1125')
 
     def get_description(self):
         return self.description
@@ -123,6 +128,7 @@ class Series(object):
                 d[key] = unicodedata.normalize(
                     'NFKD', value).encode('ascii', 'ignore')
         return '{0}'.format(urllib.urlencode(d))
+
 
 class Program(object):
 
@@ -171,7 +177,6 @@ class Program(object):
     def get_list_title(self):
         """Return a string nicely formatted for Kodi list"""
         title = self.get_title()
-        #return title
         if (self.get_season() and self.get_episode()):
             # Series and episode information
             title = "%s (S%02dE%02d)" % (title,
@@ -278,15 +283,14 @@ class Program(object):
             return self.episode
 
     def get_thumb(self, dummy_req=False):
-        url = config.IMAGE_PROXY.format(
-            urllib.quote_plus(self.thumb), '600')
-        #if dummy_req:
-        #    requests.get(url=url, verify=False)
-        return url
+        return 'http://localhost:{0}/image?u={1}&w={2}&q=90'.format(
+            ADDON.getSetting('thumbmail_port'),
+            urllib.quote_plus(self.thumb),
+            '600')
 
     def format_url(self, url):
         """Format video URL
-        
+
         Formats the pre-supplied placeholders in the video URL
         with the needed values
         """
@@ -311,7 +315,7 @@ class Program(object):
         for key in empty_list:
             d.pop(key)
         return '{0}'.format(urllib.urlencode(d))
-    
+
     def get_kodi_list_item(self):
         """Get XBMC list item
 
@@ -364,6 +368,7 @@ class Program(object):
 
     def parse_xbmc_url(self, string):
         """Parse XBMC URL
+
         Takes a string input which is a URL representation of the
         program object
         """

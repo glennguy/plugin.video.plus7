@@ -37,8 +37,6 @@ API_VER = '1.0'
 CONFIG_URL = 'https://config.swm.digital/android/1.0.json'
 MARKET_URL = 'https://api.tvapi.com.au/v1/services/market/ip/?apikey=9ae52b994a46faea21d0c06288934025'
 CONTENT_URL = 'https://component-cdn.swm.digital/content/'
-IMAGE_PROXY = 'https://imageproxy-cdn.swm.digital/image?u={0}&w={1}&q=90'
-
 
 shows_url = 'https://y7mobile.query.yahoo.com/v1/plus7/shows/public?device=play'
 query_url = 'https://y7mobile.query.yahoo.com/v1/plus7/public?device=play&key={0}'

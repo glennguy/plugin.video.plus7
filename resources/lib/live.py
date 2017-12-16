@@ -34,14 +34,12 @@ def make_live_list(url):
         if not channels:
             return
 
-        utils.log('Showing live channel list for postcode {0}'.format(
-                                        ADDON.getSetting('post_code')))
         ok = True
         for c in channels:
 
             listitem = xbmcgui.ListItem(label=c.get_list_title(),
-                                        iconImage=c.get_thumbnail(),
-                                        thumbnailImage=c.get_thumbnail())
+                                        iconImage=c.get_thumb(dummy_req=True),
+                                        thumbnailImage=c.get_thumb())
             listitem.setInfo('video', c.get_kodi_list_item())
             listitem.setProperty('IsPlayable', 'true')
 
@@ -50,10 +48,7 @@ def make_live_list(url):
                 listitem.addStreamInfo('video', c.get_kodi_video_stream_info())
 
             # Build the URL for the program, including the list_info
-            url = '{0}?program_id={1}&bcid={2}&live=true'.format(sys.argv[0],
-                                                                 c.id,
-                                                                 c.bcid)
-
+            url = '{0}?action=list_programs&{1}'.format(sys.argv[0], c.make_kodi_url())
             # Add the program item to the list
             ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),
                                              url=url,

@@ -25,31 +25,19 @@ import xbmcplugin
 from aussieaddonscommon import utils
 
 
-def make_series_list(url):
+def make_series_list(params):
     utils.log('Showing series list')
     try:
-        params = utils.get_url(url)
-        series_list = comm.get_index()
+        series_list = comm.get_series_list(params)
         series_list.sort()
 
         ok = True
         for s in series_list:
-            if params['category'] == 'All TV Shows':
-                pass
-            else:
-                if params['category'] not in s.genre:
-                    continue
-            url = "%s?series_id=%s" % (sys.argv[0], s.id)
-            thumbnail = s.get_thumbnail()
-
-            # Thumbnail that doesn't exist breaks XBMC 12
-            listitem = xbmcgui.ListItem(s.get_title())
-            if thumbnail:
-                listitem = xbmcgui.ListItem(s.get_title(),
-                                            iconImage=thumbnail,
-                                            thumbnailImage=thumbnail)
-
-            listitem.setInfo('video', {'plot': s.get_description()})
+            url = '{0}?action=list_series&{1}'.format(sys.argv[0], s.make_kodi_url())
+            listitem = xbmcgui.ListItem(s.title,
+                                        iconImage=s.get_thumb(),
+                                        thumbnailImage=s.get_thumb())
+            listitem.setInfo('video', {'plot': ''})
 
             # add the item to the media list
             ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),

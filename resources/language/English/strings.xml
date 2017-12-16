@@ -8,8 +8,8 @@
 
   <!-- Settings -->
   <string id="10093">Enable Subtitles</string>
-  <string id="10094">Postcode for live streams</string>
-
+  <string id="10094">Enable HD streams</string>
+  <string id="10092">Use DASH streams (inputstream.adaptive required)</string>
   <!-- Debugging -->
   <string id="10095">Reinstall DRM ssd_wv module</string>
   <string id="10096">Reinstall DRM widevine_cdm module</string>

@@ -25,11 +25,21 @@ ISSUE_API_URL = GITHUB_API_URL + '/issues'
 ISSUE_API_AUTH = 'eGJtY2JvdDo1OTQxNTJjMTBhZGFiNGRlN2M0YWZkZDYwZGQ5NDFkNWY4YmIzOGFj'
 GIST_API_URL = 'https://api.github.com/gists'
 
+ADDON_ID = 'plugin.video.plus7'
+
 BRIGHTCOVE_M3U8_URL = 'http://c.brightcove.com/services/mobile/streaming/index/master.m3u8?videoId={0}'
 BRIGHTCOVE_URL = 'https://edge.api.brightcove.com/playback/v1/accounts/{0}/videos/ref:{1}'
 BRIGHTCOVE_ACCOUNT = {'2376984108001': 'BCpkADawqM23Rsu_vHPRKbrIicm3fvl2i33Q_d5KoWIQ1hAlTrmpbAbKyZWXQiZ_kbgJZ7DulFHPCscZmi-4Z_OsylPgPi3h8pnYWRwbKrstrrJt08gS8vYGG8aTRA87y6VhscthRz2ZUDTh',
                       '2376984109001': 'BCpkADawqM39TuhPMJu1xTBSj0v3v4zTIs9HKuYDYQlmmru1yrD5pzbFYN8OM_vu2PLXqAsUpZqgRL3hcUCUhARK1yYpo6Qt09r2p6A1xiTsiRFSLpsg7SV-aGHCuJ-a6O5k61OKwusrR2r1',
                       '4456740435001': 'BCpkADawqM3Ty0dStHsYNCVbgBXlEbdnC6vZah6As39gvutM2aTiYRIV5ZyJH4WTWRedIYgjbdrC7Hk6Mvdx3nddTtTCcJzP-KXbkprsB0PWpdx7NQyTfdU-RfWkfg_ymolet0kzHBf8taPO'}
+API_VER = '1.0'
+
+CONFIG_URL = 'https://config.swm.digital/android/1.0.json'
+MARKET_URL = 'https://api.tvapi.com.au/v1/services/market/ip/?apikey=9ae52b994a46faea21d0c06288934025'
+CONTENT_URL = 'https://component-cdn.swm.digital/content/'
+IMAGE_PROXY = 'https://imageproxy-cdn.swm.digital/image?u={0}&w={1}&q=90'
+
+
 shows_url = 'https://y7mobile.query.yahoo.com/v1/plus7/shows/public?device=play'
 query_url = 'https://y7mobile.query.yahoo.com/v1/plus7/public?device=play&key={0}'
 live_url = 'https://y7mobile.query.yahoo.com/v1/livestream/postcode/{0}'

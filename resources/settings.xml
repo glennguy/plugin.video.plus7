@@ -2,7 +2,8 @@
 <settings>
   <!-- Settings -->
   <category label="10080">
-    <setting id="post_code" type="number" label="10094" default="2000" />
+    <setting id="hd_enabled" type="bool" label="10094" default="true" />
+    <setting id="dash_enabled" type="bool" label="10092" default="true" />
   </category>
   <!-- Debugging -->
   <category label="10090">

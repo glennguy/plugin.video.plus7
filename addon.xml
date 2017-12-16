@@ -1,6 +1,7 @@
 <?xml version="1.0" ?><addon id="plugin.video.plus7" name="Plus7" provider-name="Aussie Add-ons" version="3.2.0">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
+    <import addon="script.common.plugin.cache"/>
     <import addon="script.module.aussieaddonscommon"/>
     <import addon="script.module.issuereporter"/>
     <import addon="script.module.requests"/>

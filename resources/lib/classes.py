@@ -17,18 +17,65 @@
 #   along with this plugin. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import config
 import datetime
+import requests
+import time
+import unicodedata
+import urllib
+import uuid
 
 from aussieaddonscommon import utils
 
+class Category(object):
+    def __init__(self, **kwargs):
+        self.thumb = None
+        self.title = None
+        self.url = None
+        for key in kwargs:
+            setattr(self, key, kwargs[key])
+
+    def __cmp__(self, other):
+        return cmp(self.get_sort_title(), other.get_sort_title())
+
+    def get_title(self):
+        """Get title
+
+        Return the program title, including the Series X part
+        on the end.
+        """
+        return utils.descape(self.title)
+
+    def get_sort_title(self):
+        """Get sort title
+
+        Return a munged version of the title which
+        forces correct sorting behaviour.
+        """
+        sort_title = self.get_title().lower()
+        sort_title = sort_title.replace('the ', '')
+        return sort_title
+
+    def get_thumb(self):
+        if self.thumb:
+            return config.IMAGE_PROXY.format(
+                urllib.quote_plus(self.thumb), '1125')
+
+    
+    def make_kodi_url(self):
+        d = vars(self)
+        for key, value in d.iteritems():
+            if isinstance(value, unicode):
+                d[key] = unicodedata.normalize(
+                    'NFKD', value).encode('ascii', 'ignore')
+        return '{0}'.format(urllib.urlencode(d))
 
 class Series(object):
 
     def __init__(self):
-        self.id = None
-        self.thumbnail = None
+        self.thumb = None
         self.title = None
-        self.description = None
+        self.url = None
 
     def __repr__(self):
         return self.title
@@ -62,31 +109,39 @@ class Series(object):
         """
         return utils.descape(self.title)
 
-    def get_thumbnail(self):
-        return self.thumbnail
+    def get_thumb(self):
+        return config.IMAGE_PROXY.format(
+            urllib.quote_plus(self.thumb), '1125')
 
     def get_description(self):
         return self.description
 
+    def make_kodi_url(self):
+        d = vars(self)
+        for key, value in d.iteritems():
+            if isinstance(value, unicode):
+                d[key] = unicodedata.normalize(
+                    'NFKD', value).encode('ascii', 'ignore')
+        return '{0}'.format(urllib.urlencode(d))
 
 class Program(object):
 
     def __init__(self):
         self.id = None
-        self.bcid = None
+        self.live = None
         self.title = ''
         self.description = ''
         self.episode_title = None
         self.episode = None
         self.season = None
-        self.category = None
         self.rating = None
         self.duration = 0
         self.date = None
-        self.thumbnail = ''
+        self.thumb = ''
         self.url = None
         self.subtitle = None
         self.drm_key = None
+        self.dash = None
         self.genre = None
 
     def __repr__(self):
@@ -116,7 +171,7 @@ class Program(object):
     def get_list_title(self):
         """Return a string nicely formatted for Kodi list"""
         title = self.get_title()
-
+        #return title
         if (self.get_season() and self.get_episode()):
             # Series and episode information
             title = "%s (S%02dE%02d)" % (title,
@@ -148,7 +203,7 @@ class Program(object):
 
     def get_category(self):
         """Return a string of the category. E.g. Comedy"""
-        if self.category:
+        if self.genre:
             return utils.descape(self.genre)
 
     def get_rating(self):
@@ -222,16 +277,41 @@ class Program(object):
         if self.episode:
             return self.episode
 
-    def get_thumbnail(self):
-        """Returns the thumbnail"""
-        if self.thumbnail:
-            return utils.descape(self.thumbnail)
+    def get_thumb(self, dummy_req=False):
+        url = config.IMAGE_PROXY.format(
+            urllib.quote_plus(self.thumb), '600')
+        #if dummy_req:
+        #    requests.get(url=url, verify=False)
+        return url
+
+    def format_url(self, url):
+        """Format video URL
+        
+        Formats the pre-supplied placeholders in the video URL
+        with the needed values
+        """
+        return url.format(
+            ppId=uuid.uuid4(), deliveryId='csai').replace(
+                'deviceType=unknown', 'deviceType=android')
 
     def get_url(self):
         """Returns the URL for the video stream"""
         if self.url:
             return self.url
 
+    def make_kodi_url(self):
+        d = vars(self)
+        empty_list = []
+        for key, value in d.iteritems():
+            if not value:
+                empty_list.append(key)
+            if isinstance(value, unicode):
+                d[key] = unicodedata.normalize(
+                    'NFKD', value).encode('ascii', 'ignore')
+        for key in empty_list:
+            d.pop(key)
+        return '{0}'.format(urllib.urlencode(d))
+    
     def get_kodi_list_item(self):
         """Get XBMC list item
 
@@ -281,3 +361,15 @@ class Program(object):
         if self.get_duration():
             d['duration'] = self.get_duration()
         return d
+
+    def parse_xbmc_url(self, string):
+        """Parse XBMC URL
+        Takes a string input which is a URL representation of the
+        program object
+        """
+        d = utils.get_url(string)
+        for k, v in d.iteritems():
+            if k in vars(self):
+                setattr(self, k, v)
+        if self.thumb:
+            self.thumb = urllib.unquote_plus(d.get('thumb'))

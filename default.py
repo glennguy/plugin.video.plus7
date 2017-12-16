@@ -44,28 +44,29 @@ utils.log_kodi_platform_version()
 if __name__ == "__main__":
     params_str = sys.argv[2]
     params = utils.get_url(params_str)
-
+    utils.log('Running with params: {0}'.format(params))
     if len(params) == 0:
         categories.make_categories_list()
-    elif 'category' in params:
-        if params['category'] == 'Live TV':
-            live.make_live_list(params_str)
-        elif params['category'] == 'Settings':
-            xbmcaddon.Addon().openSettings()
-        else:
-            series.make_series_list(params_str)
-    elif 'series_id' in params:
-        programs.make_programs_list(params_str)
-    elif 'program_id' in params:
-        play.play(params_str)
     elif 'action' in params:
-        if params['action'] == 'sendreport':
+        action = params.get('action')
+        if action == 'list_categories':
+            if params['title'] == 'Live TV':
+                live.make_live_list(params_str)
+            elif params['title'] == 'Settings':
+                xbmcaddon.Addon().openSettings()
+            else:
+                series.make_series_list(params)
+        elif action == 'list_series':
+            programs.make_programs_list(params)
+        elif action == 'list_programs':
+            play.play(params)
+        elif action == 'sendreport':
             utils.user_report()
-        elif params['action'] == 'reinstall_widevine_cdm':
+        elif action == 'reinstall_widevine_cdm':
             drmhelper.get_widevinecdm()
-        elif params['action'] == 'reinstall_ssd_wv':
+        elif action == 'reinstall_ssd_wv':
             drmhelper.get_ssd_wv()
-        elif params['action'] == 'update_ia':
+        elif action == 'update_ia':
             addon = drmhelper.get_addon(drm=True)
             if not drmhelper.is_ia_current(addon, latest=True):
                 if xbmcgui.Dialog().yesno(

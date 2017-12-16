@@ -25,13 +25,12 @@ import xbmcplugin
 from aussieaddonscommon import utils
 
 
-def make_programs_list(url):
+def make_programs_list(params):
     try:
-        params = utils.get_url(url)
-        programs = comm.get_series(params["series_id"])
+        programs = comm.get_programs_list(params)
         num_programs = len(programs)
 
-        utils.log('Showing programs list for %s' % params['series_id'])
+        #utils.log('Showing programs list for %s' % params['series_id'])
 
         ok = True
         for p in programs:
@@ -45,8 +44,8 @@ def make_programs_list(url):
                 continue
 
             listitem = xbmcgui.ListItem(label=p.get_list_title(),
-                                        iconImage=p.get_thumbnail(),
-                                        thumbnailImage=p.get_thumbnail())
+                                        iconImage=p.get_thumb(dummy_req=True),
+                                        thumbnailImage=p.get_thumb())
             listitem.setInfo('video', p.get_kodi_list_item())
             listitem.setProperty('IsPlayable', 'true')
 
@@ -55,7 +54,7 @@ def make_programs_list(url):
                 listitem.addStreamInfo('video', p.get_kodi_video_stream_info())
 
             # Build the URL for the program, including the list_info
-            url = "%s?program_id=%s&bcid=%s" % (sys.argv[0], p.id, p.bcid)
+            url = '{0}?action=list_programs&{1}'.format(sys.argv[0], p.make_kodi_url())
 
             # Add the program item to the list
             ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),

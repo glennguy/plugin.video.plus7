@@ -1,4 +1,6 @@
+import classes
 import comm
+import json
 import os
 import sys
 import urllib2
@@ -15,16 +17,16 @@ from pycaption import WebVTTReader
 ADDON = xbmcaddon.Addon()
 
 
-def play(url):
+def play(params):
     try:
-        params = utils.get_url(url)
-        p = comm.get_program(params['program_id'],
-                             params['bcid'],
-                             'live' in params)
-
+        p = comm.get_program(params)
+        # enable HD streams
+        if ADDON.getSetting('hd_enabled') == 'true':
+            if '&rule=sd-only' in p.url:
+                p.url = p.url.replace('&rule=sd-only', '')
         listitem = xbmcgui.ListItem(label=p.get_title(),
-                                    iconImage=p.thumbnail,
-                                    thumbnailImage=p.thumbnail,
+                                    #iconImage=p.get_thumb,
+                                    #thumbnailImage=p.get_thumb,
                                     path=p.get_url())
         listitem.setInfo('video', p.get_kodi_list_item())
 
@@ -32,28 +34,22 @@ def play(url):
             listitem.addStreamInfo('audio', p.get_kodi_audio_stream_info())
             listitem.addStreamInfo('video', p.get_kodi_video_stream_info())
 
-        if p.drm_key:
-            try:
-                import drmhelper
-            except ImportError:
-                utils.log("Failed to import drmhelper")
-                utils.dialog_message('This program is encrypted with DRM and '
-                                     'DRM Helper not installed. For more '
-                                     'information, please visit: '
-                                     'http://aussieaddons.com/drm')
-                return
+        if p.dash:
+            import drmhelper
+            drm = p.drm_key is not None
 
-            if drmhelper.check_inputstream():
+            if drmhelper.check_inputstream(drm=drm):
                 listitem.setProperty('inputstreamaddon',
                                      'inputstream.adaptive')
                 listitem.setProperty('inputstream.adaptive.manifest_type',
                                      'mpd')
-                listitem.setProperty('inputstream.adaptive.license_type',
-                                     'com.widevine.alpha')
-                listitem.setProperty(
-                    'inputstream.adaptive.license_key',
-                    p.drm_key+'|Content-Type=application%2F'
-                              'x-www-form-urlencoded|A{SSM}|')
+                if drm:
+                    listitem.setProperty('inputstream.adaptive.license_type',
+                                         'com.widevine.alpha')
+                    listitem.setProperty(
+                        'inputstream.adaptive.license_key',
+                        p.drm_key+'|Content-Type=application%2F'
+                                  'x-www-form-urlencoded|A{SSM}|')
             else:
                 xbmcplugin.setResolvedUrl(int(sys.argv[1]),
                                           True,
@@ -62,7 +58,7 @@ def play(url):
 
         # Pull subtitles if available
         if p.subtitle:
-            utils.log("Enabling subtitles: %s" % p.subtitle)
+            utils.log('Enabling subtitles: {0}'.format(p.subtitle))
             profile = ADDON.getAddonInfo('profile')
             subfilename = xbmc.translatePath(os.path.join(profile,
                                                           'subtitle.srt'))
@@ -84,9 +80,9 @@ def play(url):
                 listitem.setSubtitles([subfilename])
 
         # Play video
-        utils.log("Attempting to play: {0} : {1}".format(p.get_title(),
+        utils.log('Attempting to play: {0} : {1}'.format(p.get_title(),
                                                          p.get_url()))
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem=listitem)
 
     except Exception:
-        utils.handle_error("Unable to play video")
+        utils.handle_error('Unable to play video')

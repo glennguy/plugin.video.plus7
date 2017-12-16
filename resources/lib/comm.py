@@ -57,9 +57,13 @@ def fetch_url(url, headers=None, retries=1):
 
 
 def get_market_id():
-    data = json.loads(fetch_url(config.MARKET_URL, retries=3))  #sometimes 404s
-    return str(data.get('_id'))
-
+    try:
+        data = json.loads(fetch_url(config.MARKET_URL, retries=3))  #sometimes 404s
+        return str(data.get('_id'))
+    except session.requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            return '15'
+    
 def api_query(key=None):
     market_id = get_market_id()
     headers = {'market-id': market_id, 'api-version': config.API_VER}

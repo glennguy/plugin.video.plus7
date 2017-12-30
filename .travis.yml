@@ -30,3 +30,4 @@ script:
   - >
     git add . &&
     git commit --allow-empty -m "Update $(basename `git -C $TRAVIS_BUILD_DIR rev-parse --show-toplevel`) to $TRAVIS_TAG" &&
+    git push || travis_terminate 1

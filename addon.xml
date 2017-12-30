@@ -1,4 +1,4 @@
-<?xml version="1.0" ?><addon id="plugin.video.plus7" name="7plus" provider-name="Aussie Add-ons" version="4.0.0">
+<?xml version="1.0" ?><addon id="plugin.video.plus7" name="7plus" provider-name="Aussie Add-ons" version="4.0.1">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
     <import addon="script.common.plugin.cache"/>

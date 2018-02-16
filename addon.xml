@@ -13,6 +13,10 @@
   </extension>
   <extension library="service.py" point="xbmc.service" start="login"/>
   <extension library="default.py" point="xbmc.addon.metadata">
+    <assets>
+      <icon>icon.png</icon>
+      <fanart>fanart.jpg</fanart>
+    </assets>
     <summary>7plus by Aussie Add-ons</summary>
     <description>Watch full episodes of your favourite TV shows as seen on Seven, 7mate, 7TWO, 7flix and racing.com, live and free.</description>
     <website>http://aussieaddons.com/addons/plus7/</website>

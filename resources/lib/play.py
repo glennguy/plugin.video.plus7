@@ -1,15 +1,13 @@
-import classes
 import comm
-import json
 import os
 import sys
-import urllib2
 import xbmc
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
 
 from aussieaddonscommon import utils
+from aussieaddonscommon import session
 
 from pycaption import SRTWriter
 from pycaption import WebVTTReader
@@ -22,11 +20,13 @@ def play(params):
         p = comm.get_program(params)
         # enable HD streams
         if ADDON.getSetting('hd_enabled') == 'true':
-            if '&rule=sd-only' in p.url:
-                p.url = p.url.replace('&rule=sd-only', '')
+            if p.dash_url:
+                if '&rule=sd-only' in p.dash_url:
+                    p.dash_url = p.dash_url.replace('&rule=sd-only', '')
+            if p.hls_url:
+                if '&rule=sd-only' in p.hls_url:
+                    p.hls_url = p.hls_url.replace('&rule=sd-only', '')
         listitem = xbmcgui.ListItem(label=p.get_title(),
-                                    #iconImage=p.get_thumb,
-                                    #thumbnailImage=p.get_thumb,
                                     path=p.get_url())
         listitem.setInfo('video', p.get_kodi_list_item())
 
@@ -34,7 +34,7 @@ def play(params):
             listitem.addStreamInfo('audio', p.get_kodi_audio_stream_info())
             listitem.addStreamInfo('video', p.get_kodi_video_stream_info())
 
-        if p.dash:
+        if (p.dash_preferred and p.dash_url) or not p.hls_url:
             import drmhelper
             drm = p.drm_key is not None
 
@@ -51,10 +51,13 @@ def play(params):
                         p.drm_key+'|Content-Type=application%2F'
                                   'x-www-form-urlencoded|A{SSM}|')
             else:
-                xbmcplugin.setResolvedUrl(int(sys.argv[1]),
-                                          True,
-                                          xbmcgui.ListItem(path=None))
-                return
+                if drm:
+                    xbmcplugin.setResolvedUrl(int(sys.argv[1]),
+                                              True,
+                                              xbmcgui.ListItem(path=None))
+                    return
+                else:
+                    pass  # let's try to play hls if available
 
         # Pull subtitles if available
         if p.subtitle:
@@ -66,8 +69,8 @@ def play(params):
             if not os.path.isdir(profiledir):
                 os.makedirs(profiledir)
 
-            webvtt_data = urllib2.urlopen(
-                p.subtitle).read().decode('utf-8')
+            webvtt_data = session.Session().get(
+                p.subtitle).text
             if webvtt_data:
                 with open(subfilename, 'w') as f:
                     webvtt_subtitle = WebVTTReader().read(webvtt_data)

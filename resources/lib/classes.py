@@ -1,22 +1,3 @@
-#
-#   Plus7 XBMC Plugin
-#   Copyright (C) 2014 Andy Botting
-#
-#
-#   This plugin is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation, either version 3 of the License, or
-#   (at your option) any later version.
-#
-#   This plugin is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this plugin. If not, see <http://www.gnu.org/licenses/>.
-#
-
 import datetime
 import unicodedata
 import urllib
@@ -144,10 +125,11 @@ class Program(object):
         self.duration = 0
         self.date = None
         self.thumb = ''
-        self.url = None
+        self.hls_url = None
+        self.dash_url = None
         self.subtitle = None
         self.drm_key = None
-        self.dash = None
+        self.dash_preferred = None
         self.genre = None
 
     def __repr__(self):
@@ -300,8 +282,10 @@ class Program(object):
 
     def get_url(self):
         """Returns the URL for the video stream"""
-        if self.url:
-            return self.url
+        if (self.dash_preferred and self.dash_url) or not self.hls_url:
+            return self.dash_url
+        else:
+            return self.hls_url
 
     def make_kodi_url(self):
         d = vars(self)

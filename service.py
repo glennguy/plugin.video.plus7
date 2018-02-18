@@ -13,6 +13,7 @@ ADDON = xbmcaddon.Addon()
 # server defaults
 TCPServer.allow_reuse_address = True
 
+
 def select_unused_port():
     """
     Helper function to select an unused port on the host machine
@@ -25,10 +26,11 @@ def select_unused_port():
     return port
 
 
-thumb_req_port = select_unused_port()    
+thumb_req_port = select_unused_port()
 ADDON.setSetting('thumbmail_port', str(thumb_req_port))
-    
-thumb_req_server = TCPServer(('127.0.0.1', thumb_req_port), ThumbRequestHandler)
+
+thumb_req_server = TCPServer(('127.0.0.1', thumb_req_port),
+                             ThumbRequestHandler)
 thumb_req_server.server_activate()
 thumb_req_server.timeout = 1
 utils.log('Started 7Plus Thumbnail HTTP server on port {0}'

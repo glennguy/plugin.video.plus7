@@ -1,35 +1,12 @@
-#   Plus7 XBMC Plugin
-#   Copyright (C) 2014 Andy Botting
-#
-#
-#   This plugin is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation, either version 3 of the License, or
-#   (at your option) any later version.
-#
-#   This plugin is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this plugin. If not, see <http://www.gnu.org/licenses/>.
-#
 import classes
 import config
 import datetime
 import json
-import m3u8
-import re
 import sys
 import time
-import urllib
 import urlparse
-import uuid
 import xbmcaddon
-import xbmcgui
 
-from aussieaddonscommon import exceptions
 from aussieaddonscommon import session
 from aussieaddonscommon import utils
 
@@ -58,12 +35,13 @@ def fetch_url(url, headers=None, retries=1):
 
 def get_market_id():
     try:
-        data = json.loads(fetch_url(config.MARKET_URL, retries=3))  #sometimes 404s
+        data = json.loads(fetch_url(config.MARKET_URL, retries=3))
         return str(data.get('_id'))
     except session.requests.exceptions.HTTPError as e:
         if e.response.status_code == 404:
             return '15'
-    
+
+
 def api_query(key=None):
     market_id = get_market_id()
     headers = {'market-id': market_id, 'api-version': config.API_VER}
@@ -88,7 +66,8 @@ def get_categories():
         c = classes.Category()
         c.title = genre.get('title')
         c.thumb = genre['image'].get('url')
-        c.url = urlparse.urljoin(config.CONTENT_URL, genre['contentLink'].get('url').lstrip('/'))
+        c.url = urlparse.urljoin(
+            config.CONTENT_URL, genre['contentLink'].get('url').lstrip('/'))
         categories_list.append(c)
     return categories_list
 
@@ -105,7 +84,9 @@ def get_series_list(params):
             s = classes.Series()
             s.title = series['image'].get('name').lstrip()
             s.thumb = series['image'].get('url')
-            s.url = urlparse.urljoin(config.CONTENT_URL, series['contentLink'].get('url').lstrip('/'))
+            s.url = urlparse.urljoin(
+                config.CONTENT_URL,
+                series['contentLink'].get('url').lstrip('/'))
             series_list.append(s)
 
     return series_list
@@ -152,6 +133,7 @@ def get_program(params):
     program.parse_xbmc_url(sys.argv[2])
     program_url = program.format_url(params.get('url'))
     data = fetch_url(program_url)
+    dash_preferred = ADDON.getSetting('dash_enabled') == 'true'
 
     try:
         program_data = json.loads(data)
@@ -164,51 +146,32 @@ def get_program(params):
             utils.log("No subtitles available for this program")
         else:
             utils.log("Subtitles are available for this program")
-            program.subtitle = program_data['media']['text_tracks'][0].get('src')
-    
-    # If no DASH streams available, use MP4
-    mp4_list = []
+            program.subtitle = (program_data['media']['text_tracks'][0]
+                                .get('src'))
+
     for source in program_data['media'].get('sources'):
-        if program.live:
-            index_m3u8 = m3u8.load(source.get('src'))
-            # Get the highest bitrate video
-            program.url = (sorted(
-                index_m3u8.playlists,
-                key=lambda playlist: int(playlist.stream_info.bandwidth))
-                    [-1].uri)
-            return program
-        if source.get('container') == 'MP4':
-            src = source.get('src')
-            if src:
-                res = source.get('height')
-                mp4_list.append({'SRC': src, 'RES': res})
-    if len(mp4_list) > 0:
-        sorted_mp4_list = sorted(mp4_list,
-                                 key=lambda x: x['RES'],
-                                 reverse=True)
-        stream = sorted_mp4_list[0]
-        program.url = stream['SRC']
-        utils.log(stream)
-        if program.url:
-            utils.log('Using {0}p MP4 stream'.format(stream['RES']))
-            return program
-    # Try for DASH first if enabled
-    for source in program_data['media'].get('sources'):
+        # Get DASH URL
         if source.get('type') == 'application/dash+xml':
             if 'hbbtv' in source.get('src'):
                 continue
-            program.url = source.get('src')
-            program.dash = True
-            utils.log('Using DASH stream...')
+            program.dash_url = source.get('src')
+            program.dash_preferred = dash_preferred
+            utils.log('Found DASH stream: {0}'.format(program.dash_url))
             if 'key_systems' in source:
                 if 'com.widevine.alpha' in source['key_systems']:
                     program.drm_key = (source['key_systems']
                                              ['com.widevine.alpha']
                                              ['license_url'])
-                    utils.log('Using DASH/Widevine stream...')
+                    utils.log('DASH stream using Widevine')
+        # Get HLS URL
+        elif source.get('type') in ['application/x-mpegURL',
+                                    'application/vnd.apple.mpegurl']:
+            if 'key_systems' in source:
+                continue
+            if source.get('ext_x_version') != '5':
+                program.hls_url = source.get('src')
+                utils.log('Found HLS stream: {0}'.format(program.hls_url))
     return program
-
-    
 
 
 def get_live():
@@ -222,7 +185,8 @@ def get_live():
                 c.live = True
                 c.thumb = channel['channelLogo'].get('url')
                 c.title = channel.get('name')
-                c.description = channel['schedule'][0]['playerData'].get('synopsis')
+                c.description = (channel['schedule'][0]['playerData']
+                                 .get('synopsis'))
                 c.url = channel['schedule'][0]['playerData'].get('videoUrl')
                 channel_list.append(c)
 
